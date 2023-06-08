@@ -5,4 +5,4 @@ let cookies = require("./cookies")
 console.log('cookies',cookies.length)
 
 //cookie启动
-cookies.forEach(c => autoLearn(c));
+cookies.forEach(c => autoLearn(c.name,c.value));

@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-module.exports.autoLearn = function (cookie) {
+module.exports.autoLearn = function (name,cookie) {
     let G_courseId = "",
         timer = null;
     axios.defaults.headers.cookie = cookie;
@@ -25,7 +25,11 @@ module.exports.autoLearn = function (cookie) {
 
                 let str = res.data.match(/DeleteStudentCourse\((.*)\,\'.*/);
 
-                if (!str) return;
+                if (!str) {
+                    console.log(name);
+                    console.log("已选的课程已全部学完，或者还没有选课。");
+                    return;   
+                }
 
                 str = str[1].replace(/\'/g, "").split(",");
 
@@ -46,6 +50,7 @@ module.exports.autoLearn = function (cookie) {
                 timer = setInterval(updateTime, 60 * 1000);
             })
             .catch((err) => {
+                console.log(name);
                 console.log("获取课程失败", err);
             });
     }
@@ -65,8 +70,8 @@ module.exports.autoLearn = function (cookie) {
                             `selectclassid=${courseId}&MainContents=${content}&PerceptionExperience=${content}&CourseGuId=${CourseGuId}`
                         )
                         .then((res) => {
-                            console.log(res.data);
                             if (res.data.state === "success") {
+                                console.log(name);
                                 console.log(res.data);
                             }
                         });
@@ -88,6 +93,7 @@ module.exports.autoLearn = function (cookie) {
                             `selectclassid=${courseId}`
                         )
                         .then((res) => {
+                            console.log(name);
                             console.log(res.data);
                         });
                 }
@@ -102,6 +108,7 @@ module.exports.autoLearn = function (cookie) {
                 `selectclassid=${G_courseId}`
             )
             .then((res) => {
+                console.log(name);
                 console.log(res.data, G_courseId);
             });
     }
