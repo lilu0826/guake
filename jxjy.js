@@ -1,6 +1,7 @@
-const axios = require("axios");
+const {create} = require("axios");
 
-module.exports.autoLearn = function (name,cookie) {
+module.exports.autoLearn = function (name, cookie) {
+    let axios = create();
     let G_courseId = "",
         timer = null;
     axios.defaults.headers.cookie = cookie;
