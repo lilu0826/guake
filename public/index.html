@@ -11,15 +11,22 @@
         }
 
         #qrcode {
-            width: 100%;
+            display: block;
+            width: 80%;
             height: auto;
+            margin: auto;
+        }
+        #tips{
+            display:block;
+            text-align: center;
         }
     </style>
 </head>
 
 <body>
+    <h1 style="text-align:center;">加油奥里给</h1>
     <img id="qrcode" src="/getImage" alt="" srcset="">
-    <strong id="tips"></strong>
+    <strong id="tips">长按上面二维码,然后选择[识别图中的二维码]</strong>
     <script>
         let codeid = ''
         let timer = null
