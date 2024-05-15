@@ -1,8 +1,12 @@
 let { autoLearn } = require("./jxjy")
+const fs = require("fs")
 
-let cookies = require("./cookies")
+
+
+const str = fs.readFileSync("./cookies.json").toString()
+const cookies = JSON.parse(str)
 
 console.log('cookies',cookies.length)
 
 //cookie启动
-cookies.forEach(c => autoLearn(c.name,c.value));
+cookies.forEach(c => autoLearn(c.username,c.userCookies));

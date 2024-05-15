@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加油奥里给</title>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        #qrcode {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <img id="qrcode" src="/getImage" alt="" srcset="">
+    <strong id="tips"></strong>
+    <script>
+        let codeid = ''
+        let timer = null
+        fetch("/getImage").then(res => res.json()).then(json => {
+            document.querySelector("#qrcode").src = "https://www.cdjxjy.com/" + json.ImageUrl
+            codeid = json.codeid
+            timer = setTimeout(getStatus, 3000)
+        })
+
+        function getStatus() {
+            fetch("/wxQrloginCheck?codeid=" + codeid).then(res => res.json()).then(json => {
+                if (json.openid) {
+                    clearTimeout(timer)
+                    fetch("/wxLogin?openid=" + json.openid).then(res => res.json()).then(json => {
+                        console.log(json)
+                        document.querySelector("#qrcode").remove()
+                        document.querySelector("#tips").innerHTML = json.username +"老师登录成功了，请关闭本页面"
+                    })
+                } else {
+                    timer = setTimeout(getStatus, 3000)
+                }
+            })
+        }
+
+    </script>
+</body>
+
+</html>
