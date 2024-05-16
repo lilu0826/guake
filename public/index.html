@@ -8,6 +8,10 @@
     <style>
         body {
             margin: 0;
+            max-width: 600px;
+            margin: auto;
+            padding: 10px;
+            background: #f5f5f5;
         }
 
         #qrcode {
@@ -15,18 +19,38 @@
             width: 80%;
             height: auto;
             margin: auto;
+            aspect-ratio: 1;
         }
         #tips{
             display:block;
             text-align: center;
+            color: chocolate;
+            margin-top: 10px;
+        }
+        #power{
+            text-align: right;
+            margin-top: 30px;
+            color: cornflowerblue;
         }
     </style>
 </head>
 
 <body>
-    <h1 style="text-align:center;">加油奥里给</h1>
-    <img id="qrcode" src="/getImage" alt="" srcset="">
+    <h3 style="text-align:center;">开机混底薪</h3>
+    <img id="qrcode" src="" alt="二维码一个" srcset="">
     <strong id="tips">长按上面二维码,然后选择[识别图中的二维码]</strong>
+    
+    
+    <h5 style="text-align:center;" id="title">
+        <script src="https://api.xygeng.cn/openapi/one/get" type="text/javascript" charset="utf-8"></script>
+    </h5>
+    
+    <div id="power">
+        ---develop by 帅哥程序猿
+    </div>
+    
+    
+    
     <script>
         let codeid = ''
         let timer = null
@@ -42,8 +66,8 @@
                     clearTimeout(timer)
                     fetch("/wxLogin?openid=" + json.openid).then(res => res.json()).then(json => {
                         console.log(json)
-                        document.querySelector("#qrcode").remove()
-                        document.querySelector("#tips").innerHTML = json.username +"老师登录成功了，请关闭本页面"
+                        document.querySelector("#qrcode").style.opacity = 0.1
+                        document.querySelector("#tips").innerHTML = json.username +"老师登录成功了，请关闭本页面，<i>剩下的交给天意</i>"
                     })
                 } else {
                     timer = setTimeout(getStatus, 3000)
