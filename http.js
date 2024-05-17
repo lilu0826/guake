@@ -34,10 +34,9 @@ app.get("/wxLogin", async function (req, res) {
 app.get("/userList", async function (req, res) {
     const str = fs.readFileSync("./cookies.json").toString();
     const cookies = JSON.parse(str);
-
+    cookies.reverse();
     for (const item of cookies) {
         const html = await SelectCourseRecord(item.userCookies);
-        console.log(typeof html);
         const tips = html.match(
             /您本学年应修网上课程.*学分，已获得.*学时，已选网上课程.*学时，还需要选择.*学时的课程/
         );

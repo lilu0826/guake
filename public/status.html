@@ -32,11 +32,16 @@
             margin-top: 30px;
             color: cornflowerblue;
         }
+        #list li {
+            margin-top: 20px;
+        }
     </style>
 </head>
 
 <body>
     <h3 style="text-align:center;">状态查询</h3>
+    
+    <h4 id="tips">加载中...</h4>
     
     <div class="list" id="list">
         
@@ -54,8 +59,9 @@
         function createList(json) {
             let list = document.createElement('ul')
             json.forEach(item => {
+                item.tips = item.tips.replace("还需要选择","还需要学习")
                 let li = document.createElement('li')
-                li.innerHTML = `${item.username}老师，${item.tips}`
+                li.innerHTML = `<b>${item.username}</b>老师，${item.tips}`
                 list.appendChild(li)
             })
             return list
@@ -64,6 +70,7 @@
         fetch("/userList").then(res => res.json()).then(json => {
             console.log(json)
             document.querySelector('#list').appendChild(createList(json))
+            document.querySelector("#tips").innerHTML = `共有${json.length}名老师正在学习中👇`
         })
     </script>
 </body>
