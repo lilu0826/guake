@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加油奥里给</title>
+    <style>
+        body {
+            margin: 0;
+            max-width: 600px;
+            margin: auto;
+            padding: 10px;
+            background: #f5f5f5;
+        }
+
+        #qrcode {
+            display: block;
+            width: 80%;
+            height: auto;
+            margin: auto;
+            aspect-ratio: 1;
+        }
+        #tips{
+            display:block;
+            text-align: center;
+            color: chocolate;
+            margin-top: 10px;
+        }
+        #power{
+            text-align: right;
+            margin-top: 30px;
+            color: cornflowerblue;
+        }
+    </style>
+</head>
+
+<body>
+    <h3 style="text-align:center;">状态查询</h3>
+    
+    <div class="list" id="list">
+        
+    </div>
+
+
+    <div id="power">
+        ---develop by 帅哥程序猿
+    </div>
+    
+    
+    
+    <script>
+
+        function createList(json) {
+            let list = document.createElement('ul')
+            json.forEach(item => {
+                let li = document.createElement('li')
+                li.innerHTML = `${item.username}老师，${item.tips}`
+                list.appendChild(li)
+            })
+            return list
+        }
+
+        fetch("/userList").then(res => res.json()).then(json => {
+            console.log(json)
+            document.querySelector('#list').appendChild(createList(json))
+        })
+    </script>
+</body>
+
+</html>
