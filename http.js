@@ -1,4 +1,8 @@
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
+process.on("uncaughtException", function (err) {
+    console.log(err.message);
+});
+
 const {
     createLogin,
     wxQrloginCheck,
