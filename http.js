@@ -7,9 +7,9 @@ const {
 } = require("./jxjy-login");
 var express = require("express");
 const fs = require("fs");
-
+const compression = require('compression')
 var app = express();
-
+app.use(compression())
 app.use("/public", express.static("public"));
 
 app.get("/getImage", async function (req, res) {

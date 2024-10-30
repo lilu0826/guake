@@ -1,3 +1,5 @@
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
+
 let { autoLearn } = require("./jxjy")
 const fs = require("fs")
 
