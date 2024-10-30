@@ -86,7 +86,7 @@ async function wxQrlogin(openid) {
             hs.push("login_type_from=person");
             const userCookies = hs.join(";");
             res.data.userCookies = userCookies;
-
+            res.data.openid = openid;
             //执行选课
             selectCourse(userCookies).then(() => {
                 const str = fs.readFileSync("./cookies.json").toString();
@@ -95,7 +95,7 @@ async function wxQrlogin(openid) {
                     (item) => item.userid === res.data.userid
                 );
                 if (dataIndex >= 0) {
-                    [1].splice(dataArr, 1, res.data);
+                    dataArr.splice(dataIndex, 1, res.data);
                 } else {
                     dataArr.push(res.data);
                 }
