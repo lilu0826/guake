@@ -6,7 +6,6 @@ process.on("uncaughtException", function (err) {
 const {
     createLogin,
     wxQrloginCheck,
-    wxQrlogin,
     SelectCourseRecord,
 } = require("./jxjy-login");
 var express = require("express");
@@ -24,15 +23,6 @@ app.get("/getImage", async function (req, res) {
 app.get("/wxQrloginCheck", async function (req, res) {
     let codeid = req.query.codeid;
     const data = await wxQrloginCheck(codeid);
-    res.send(data);
-});
-
-app.get("/wxLogin", async function (req, res) {
-    // openid=oH-jTv7vuBcuJ-mAhxc2m6qVI9sQ
-    // https://www.cdjxjy.com/Project/API/UserAPI.ashx?a=wxteacherlogin
-    // {code: 1, api: '/Project/API/UserAPI.ashx?a=', openid: 'oH-jTv7vuBcuJ-mAhxc2m6qVI9sQ'}
-    let openid = req.query.openid;
-    const data = await wxQrlogin(openid);
     res.send(data);
 });
 

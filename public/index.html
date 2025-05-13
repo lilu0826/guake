@@ -62,13 +62,10 @@
 
         function getStatus() {
             fetch("/wxQrloginCheck?codeid=" + codeid).then(res => res.json()).then(json => {
-                if (json.openid) {
+                if (json.code == 1) {
                     clearTimeout(timer)
-                    fetch("/wxLogin?openid=" + json.openid).then(res => res.json()).then(json => {
-                        console.log(json)
-                        document.querySelector("#qrcode").style.opacity = 0.1
-                        document.querySelector("#tips").innerHTML = json.username +"老师登录成功了，请关闭本页面，<i>剩下的交给天意</i>"
-                    })
+                    document.querySelector("#qrcode").style.opacity = 0.1
+                    document.querySelector("#tips").innerHTML = "登录成功了，请关闭本页面，<i>剩下的交给天意</i>"
                 } else {
                     timer = setTimeout(getStatus, 3000)
                 }
