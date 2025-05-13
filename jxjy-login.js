@@ -13,18 +13,7 @@ axios.defaults.headers.post["Accept-Language"] = "zh-CN,zh;q=0.9,en;q=0.8";
 axios.defaults.headers.post["User-Agent"] =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36";
 
-const courseidList = [
-    "fff2f80a-5872-477a-8d80-f3646defa0ca",
-    "ffe847fe-a45e-4096-9f55-9f8a2b2cadb8",
-    "ff469400-17c1-4739-a280-c617eec546b2",
-    "ff1ebdab-7395-4c36-b7d1-e2769ad0d56f",
-    "fe6d26e4-1f19-4ad7-9448-dc41c0778132",
-    "fd64d61c-44b5-4381-9737-d6cd32a5f992",
-    "fc8bf122-5fb4-4b4e-9bc6-d54c0fac26a1",
-    "fc76b768-04c0-479d-8d88-2eb2365017e0",
-    "fc73ec9b-79c2-4dfc-b799-5ea1cdfaad89",
-    "fbcbcbce-5a53-45f6-8a79-ec61abd3e74a",
-];
+const courseidList = require("./courseList.js")
 
 async function selectCourse(Cookie) {
     for (const courseid of courseidList) {
