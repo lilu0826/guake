@@ -1,10 +1,10 @@
-const { create } = require("axios");
-const fs = require("fs");
+import pkg from "axios";
+import courseidList from "../data/courseList.js";
+import { restart } from "./autoLearn.js";
+import { upsertUserData } from "../data/db.js";
 
-//启动任务
-const { fork } = require("child_process");
-let child = fork("./start.js");
-
+//配置axios请求实例
+const { create } = pkg;
 let axios = create();
 axios.defaults.headers.post["Content-Type"] =
     "application/x-www-form-urlencoded; charset=UTF-8";
@@ -12,9 +12,6 @@ axios.defaults.headers.post["Referer"] = "https://www.cdjxjy.com";
 axios.defaults.headers.post["Accept-Language"] = "zh-CN,zh;q=0.9,en;q=0.8";
 axios.defaults.headers.post["User-Agent"] =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36";
-
-//待选课列表
-const courseidList = require("./courseList.js");
 
 //执行选课
 async function selectCourse(Cookie) {
@@ -71,26 +68,18 @@ async function createLogin() {
 
 //执行选课
 function doUserInfoAndSelectCourse(userCookies) {
-    const useObj = { userCookies };
+    const userObj = { userCookies };
     GetInfo(userCookies).then((info) => {
-        useObj.userid = info.UserCode;
-        useObj.username = info.UserName;
+        userObj.userid = info.UserCode;
+        userObj.username = info.UserName;
         //执行选课
         selectCourse(userCookies).then(() => {
-            const str = fs.readFileSync("./cookies.json").toString();
-            const dataArr = JSON.parse(str);
-            const dataIndex = dataArr.findIndex(
-                (item) => item.userid === useObj.userid
-            );
-            if (dataIndex >= 0) {
-                dataArr.splice(dataIndex, 1, useObj);
-            } else {
-                dataArr.push(useObj);
-            }
-            fs.writeFileSync("./cookies.json", JSON.stringify(dataArr));
-            //杀掉子进程，并重新运行
-            child.kill();
-            child = fork("./start.js");
+            //更新用户数据库
+            upsertUserData(userObj).then(() => {
+                console.log("更新用户数据库成功");
+                //重新运行
+                restart();
+            });
         });
     });
 }
@@ -117,6 +106,4 @@ async function wxQrloginCheck(codeid) {
         });
 }
 
-module.exports.createLogin = createLogin;
-module.exports.wxQrloginCheck = wxQrloginCheck;
-module.exports.SelectCourseRecord = SelectCourseRecord;
+export { createLogin, wxQrloginCheck, SelectCourseRecord };

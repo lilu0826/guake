@@ -1,9 +1,11 @@
-const {create} = require("axios");
-
-module.exports.autoLearn = function (name, cookie) {
+import pkg from "axios";
+import { getAllData } from "../data/db.js";
+const { create } = pkg;
+function autoLearn(name, cookie) {
     let axios = create();
-    let G_courseId = "",
-        timer = null;
+    let G_courseId = "";
+    let G_courseTimer = null;
+    let timer = null;
     axios.defaults.headers.cookie = cookie;
     axios.defaults.headers.post["Content-Type"] =
         "application/x-www-form-urlencoded; charset=UTF-8";
@@ -13,23 +15,27 @@ module.exports.autoLearn = function (name, cookie) {
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36";
     //开始
     getAllCourse();
-    //每15分钟刷新一次
-    setInterval(getAllCourse, 16 * 60 * 1000);
-    //获取选择的课程列表
+    //每15分钟刷新一次最新学习的课程
+    G_courseTimer = setInterval(getAllCourse, 16 * 60 * 1000);
+    //更新当前课程的学习时间
+    //每分钟更新一次
+    timer = setInterval(updateTime, 60 * 1000);
+
+    //获取选择的课程列表,并切换到第一个课程并更新学习记录
     function getAllCourse() {
-        clearInterval(timer);
         return axios
             .get("https://www.cdjxjy.com/student/SelectCourseRecord.aspx")
             .then((res) => {
-                // console.log(res.data)
-                //DeleteStudentCourse('e33d652c-b7a1-4be7-9f1b-be95c8ddf88e','a73cd735-d21d-48dc-901c-dc2041e33c30','2022/5/22 22:39:02')
-
+                //获取课程ID
                 let str = res.data.match(/DeleteStudentCourse\((.*)\,\'.*/);
 
                 if (!str) {
                     console.log(name);
                     console.log("已选的课程已全部学完，或者还没有选课。");
-                    return;   
+                    //清除定时器
+                    clearInterval(G_courseTimer);
+                    clearInterval(timer);
+                    return;
                 }
 
                 str = str[1].replace(/\'/g, "").split(",");
@@ -42,13 +48,10 @@ module.exports.autoLearn = function (name, cookie) {
                     str[1],
                     "课程评价是指根据一定的标准和课程系统信息以科学的方法检查课程的目标、编订和实施是否实现了教育目的，实现的程度如何，以判定课程设计的效果，并据此作出改进课程的决策。"
                 );
-                //更新其时间
+                //保留当前课程id
                 G_courseId = str[0];
-                //清除上次的
-                clearInterval(timer);
-                //开始更新
-                console.log(str[1]);
-                timer = setInterval(updateTime, 60 * 1000);
+
+                console.log(name, "正在学习：", str[0]);
             })
             .catch((err) => {
                 console.log(name);
@@ -103,14 +106,59 @@ module.exports.autoLearn = function (name, cookie) {
 
     function updateTime() {
         //更新时间，每隔5分钟请求
+        if (!G_courseId) {
+            return;
+        }
         axios
             .post(
                 "https://www.cdjxjy.com/ashx/SelectApi.ashx?a=UpdateLookTime",
                 `selectclassid=${G_courseId}`
             )
             .then((res) => {
-                console.log(name);
-                console.log(res.data, G_courseId);
+                console.log(`${name}更新${G_courseId}学习时间:`, res.data);
             });
     }
-};
+    return () => {
+        //返回一个函数，停止学习
+        clearInterval(timer);
+        clearInterval(G_courseTimer);
+        timer = null;
+        G_courseTimer = null;
+    };
+}
+
+function start() {
+    let stopList = [];
+    let isStop = false;
+    getAllData().then((data) => {
+        console.log("data", data.length);
+        //遍历所有数据
+        if (!isStop) {
+            data.forEach((item) => {
+                //开始学习
+                let fn = autoLearn(item.username, item.userCookies);
+                stopList.push(fn);
+            });
+        }
+    });
+    return function () {
+        //停止学习
+        isStop = true;
+        stopList.forEach((fn) => {
+            fn();
+        });
+        stopList = [];
+    };
+}
+
+//开始学习
+//每次启动都重新开始学习
+let stop = start();
+
+//导出函数,在必要时重新开始学习
+export function restart() {
+    //停止学习
+    stop();
+    //重新开始学习
+    stop = start();
+}

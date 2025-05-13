@@ -3,14 +3,17 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start": "node ./http.js"
+    "start": "node ./index.js",
+    "dev": "node --watch ./index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.21.4",
     "compression": "^1.7.4",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "nedb": "^1.8.0"
   }
 }
