@@ -19,8 +19,6 @@ app.set("view engine", "ejs");
 app.get("/", async function (req, res) {
     const data = await getAllData();
     data.forEach((item) => {
-        delete item.userCookies;
-        delete item.userid;
         item.tips = item.tips.replace("还需要选择", "还需要学习");
     });
     const usernames = data.map((item) => item.username);
