@@ -21,9 +21,9 @@ app.get("/", async function (req, res) {
     data.forEach((item) => {
         item.tips = item.tips.replace("还需要选择", "还需要学习");
     });
-    const usernames = data.map((item) => item.username);
-    const completed = data.map((el) => el.tips.match(/\d+\.?\d*/g)[1]);
-    const uncompleted = data.map((el) => el.tips.match(/\d+\.?\d*/g)[3]);
+    const usernames = data.map((item) => item.username).reverse();
+    const completed = data.map((el) => el.tips.match(/\d+\.?\d*/g)[1]).reverse();
+    const uncompleted = data.map((el) => el.tips.match(/\d+\.?\d*/g)[3]).reverse();
     res.render("index", { data: data, usernames, completed, uncompleted });
 });
 

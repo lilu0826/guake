@@ -1,7 +1,8 @@
 import NeDB from "nedb";
 import { fileURLToPath } from "url";
 import path from "path";
-
+import pkg from "pinyin";
+const { pinyin } = pkg;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -17,7 +18,8 @@ export function getAllData() {
                 console.error("Error finding documents:", err);
                 reject(err);
             } else {
-                resolve(docs);
+                const result = docs.sort((a, b) => pinyin.compare(a.username, b.username));
+                resolve(result);
             }
         });
     });
