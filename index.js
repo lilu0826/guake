@@ -3,51 +3,31 @@ process.on("uncaughtException", function (err) {
     console.log(err.message);
 });
 
-import {
-    createLogin,
-    wxQrloginCheck,
-    SelectCourseRecord,
-    createLoginToUrl,
-} from "./utils/login.js";
+import { createLoginToUrl } from "./utils/login.js";
 import express from "express";
 import compression from "compression";
 import { getAllData } from "./data/db.js";
-import { fileURLToPath } from 'url';
-import path from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 var app = express();
 app.use(compression());
 app.use("/public", express.static("public"));
-// app.get("/getImage", async function (req, res) {
-//     const data = await createLogin();
-//     res.send(data);
-// });
 
-// app.get("/wxQrloginCheck", async function (req, res) {
-//     let codeid = req.query.codeid;
-//     const data = await wxQrloginCheck(codeid);
-//     res.send(data);
-// });
+app.set("views", "./views");
+app.set("view engine", "ejs");
 
-app.get("/userList", async function (req, res) {
-    const users = await getAllData();
-    users.forEach(user => {
-        delete user.userCookies;
-        delete user.userid
+//获取状态
+app.get("/", async function (req, res) {
+    const data = await getAllData();
+    data.forEach((item) => {
+        delete item.userCookies;
+        delete item.userid;
+        item.tips = item.tips.replace("还需要选择", "还需要学习");
     });
-    res.send(users);
+    const usernames = data.map((item) => item.username);
+    const completed = data.map((el) => el.tips.match(/\d+\.?\d*/g)[1]);
+    const uncompleted = data.map((el) => el.tips.match(/\d+\.?\d*/g)[3]);
+    res.render("index", { data: data, usernames, completed, uncompleted });
 });
-
-// app.get("/", function (req, res) {
-//     res.sendFile(__dirname + "/public/index.html");
-// });
-app.get("/", function (req, res) {
-    res.sendFile(__dirname + "/public/status.html");
-});
-
 
 //直接重定向登录，由后端跟踪登录状态
 app.get("/login", async function (req, res) {
@@ -55,7 +35,6 @@ app.get("/login", async function (req, res) {
     console.log("二维码内容:", code);
     res.redirect(302, code);
 });
-
 
 var server = app.listen(8081, function () {
     var port = server.address().port;

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>加油奥里给</title>
+        <script src="/public/echarts.min.js"></script>
+        <style>
+            body {
+                margin: 0;
+                max-width: 600px;
+                margin: auto;
+                padding: 10px;
+                background: #f5f5f5;
+            }
+
+            #qrcode {
+                display: block;
+                width: 80%;
+                height: auto;
+                margin: auto;
+                aspect-ratio: 1;
+            }
+
+            #tips {
+                display: block;
+                text-align: center;
+                color: chocolate;
+                margin-top: 10px;
+            }
+
+            #power {
+                text-align: right;
+                margin-top: 30px;
+                color: cornflowerblue;
+            }
+
+            #list li {
+                margin-top: 20px;
+            }
+
+            .center {
+                text-align: center;
+            }
+
+            a {
+                color: #007bff;
+                text-decoration: none;
+                padding: 0 5px;
+                border-radius: 5px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h3 class="center">状态查询</h3>
+
+        <h4 class="center">
+            没有你的名字？点击👉<a href="/login">这里👈</a>一键登录
+        </h4>
+
+        <h4 id="tips">共有<%= data.length %>名老师正在学习中👇</h4>
+
+        <div id="chart" style="height: 400px"></div>
+
+        <div class="list" id="list">
+            <ul>
+                <% data.forEach(item=> { %>
+                <li><b><%=item.username%></b>老师，<%=item.tips%></li>
+                <% }) %>
+            </ul>
+        </div>
+
+        <div id="power">---develop by 帅哥程序猿</div>
+        <script>
+            function drawChart() {
+                var chartDom = document.getElementById("chart");
+                var myChart = echarts.init(chartDom);
+                var option;
+
+                option = {
+                    // title: {
+                    //     text: '课时统计'
+                    // },
+                    legend: {
+                        show: true,
+                    },
+                    tooltip: {
+                        show: true,
+                        trigger: "axis",
+                    },
+                    grid: {
+                        left: 30,
+                        right: 30,
+                        bottom: 10,
+                        containLabel: true,
+                    },
+                    yAxis: {
+                        type: "category",
+                        data: <%- JSON.stringify(usernames) %>,
+                        axisLabel: {},
+                        axisTick: {
+                            alignWithLabel: true,
+                        },
+                    },
+                    xAxis: {
+                        type: "value",
+                    },
+                    series: [
+                        {
+                            name: "已完成课时",
+                            data: <%- JSON.stringify(completed) %>,
+                            type: "bar",
+                        },
+                        {
+                            name: "未完成课时",
+                            data: <%- JSON.stringify(uncompleted) %>,
+                            type: "bar",
+                        },
+                    ],
+                };
+
+                option && myChart.setOption(option);
+            }
+            document.addEventListener("DOMContentLoaded", function () {
+                drawChart();
+            });
+        </script>
+    </body>
+</html>
