@@ -33,8 +33,12 @@ app.use("/public", express.static("public"));
 // });
 
 app.get("/userList", async function (req, res) {
-    const cookies = await getAllData();
-    res.send(cookies);
+    const users = await getAllData();
+    users.forEach(user => {
+        delete user.userCookies;
+        delete user.userid
+    });
+    res.send(users);
 });
 
 // app.get("/", function (req, res) {
