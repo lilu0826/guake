@@ -2,6 +2,10 @@ import pkg from "axios";
 import courseidList from "../data/courseList.js";
 import { restart } from "./autoLearn.js";
 import { upsertUserData } from "../data/db.js";
+import jsqr from "jsqr";
+import sharp from "sharp";
+
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 
 //配置axios请求实例
 const { create } = pkg;
@@ -106,4 +110,77 @@ async function wxQrloginCheck(codeid) {
         });
 }
 
-export { createLogin, wxQrloginCheck, SelectCourseRecord };
+async function getImageCode(buffer) {
+    const image = await sharp(buffer);
+    const metadata = await image.metadata();
+    const { width, height } = metadata;
+    // 获取原始位图数据（raw buffer）
+    const imgData = await image
+        .raw()
+        .ensureAlpha() // 保证有 alpha 通道，避免不同图片格式返回不同通道数
+        .toBuffer();
+    const code = jsqr(imgData, width, height);
+    return code?.data || "";
+}
+
+async function createLoginToUrl() {
+    const res = await axios.post(
+        "https://www.cdjxjy.com/ashx/BaseApi.ashx?a=CreateLogin"
+    );
+    const qrCodeUrl = "https://www.cdjxjy.com/" + res.data.ImageUrl;
+    const codeid = res.data.codeid;
+    const buffer = await axios.get(qrCodeUrl, {
+        responseType: "arraybuffer",
+    });
+    const code = await getImageCode(buffer.data);
+    // 轮询登录状态
+    // 这里可以使用轮询函数来检查登录状态
+    pollingLoginStatus(codeid);
+    return { code, codeid };
+}
+
+async function poll(
+    fn = () => Promise.resolve,
+    interval = 2000,
+    maxAttempts = 10
+) {
+    let attempts = 0;
+
+    while (attempts < maxAttempts) {
+        try {
+            const done = await fn();
+            if (done) {
+                console.log("轮询结束，任务完成");
+                break;
+            }
+        } catch (err) {
+            console.error("轮询出错:", err);
+        }
+
+        attempts++;
+        await new Promise((resolve) => setTimeout(resolve, interval));
+    }
+
+    if (attempts >= maxAttempts) {
+        console.warn("达到最大轮询次数，退出轮询");
+    }
+}
+
+function pollingLoginStatus(codeid) {
+    poll(
+        async () => {
+            const data = await wxQrloginCheck(codeid);
+            console.log("当前状态:", data);
+            return data.code === 1; // 返回 true 表示轮询完成
+        },
+        3000,
+        10
+    );
+}
+
+export {
+    createLogin,
+    wxQrloginCheck,
+    SelectCourseRecord,
+    createLoginToUrl,
+};

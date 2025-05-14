@@ -7,6 +7,7 @@ import {
     createLogin,
     wxQrloginCheck,
     SelectCourseRecord,
+    createLoginToUrl,
 } from "./utils/login.js";
 import express from "express";
 import compression from "compression";
@@ -20,35 +21,37 @@ const __dirname = path.dirname(__filename);
 var app = express();
 app.use(compression());
 app.use("/public", express.static("public"));
-app.get("/getImage", async function (req, res) {
-    const data = await createLogin();
-    res.send(data);
-});
+// app.get("/getImage", async function (req, res) {
+//     const data = await createLogin();
+//     res.send(data);
+// });
 
-app.get("/wxQrloginCheck", async function (req, res) {
-    let codeid = req.query.codeid;
-    const data = await wxQrloginCheck(codeid);
-    res.send(data);
-});
+// app.get("/wxQrloginCheck", async function (req, res) {
+//     let codeid = req.query.codeid;
+//     const data = await wxQrloginCheck(codeid);
+//     res.send(data);
+// });
 
 app.get("/userList", async function (req, res) {
     const cookies = await getAllData();
-    for (const item of cookies) {
-        const html = await SelectCourseRecord(item.userCookies);
-        const tips = html.match(
-            /您本学年应修网上课程.*学分，已获得.*学时，已选网上课程.*学时，还需要选择.*学时的课程/
-        );
-        item.tips = tips[0];
-    }
     res.send(cookies);
 });
 
+// app.get("/", function (req, res) {
+//     res.sendFile(__dirname + "/public/index.html");
+// });
 app.get("/", function (req, res) {
-    res.sendFile(__dirname + "/public/index.html");
-});
-app.get("/status", function (req, res) {
     res.sendFile(__dirname + "/public/status.html");
 });
+
+
+//直接重定向登录，由后端跟踪登录状态
+app.get("/login", async function (req, res) {
+    const { code } = await createLoginToUrl();
+    console.log("二维码内容:", code);
+    res.redirect(302, code);
+});
+
 
 var server = app.listen(8081, function () {
     var port = server.address().port;

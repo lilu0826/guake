@@ -1,7 +1,7 @@
 import pkg from "axios";
-import { getAllData } from "../data/db.js";
+import { getAllData, upsertUserData } from "../data/db.js";
 const { create } = pkg;
-function autoLearn(name, cookie) {
+function autoLearn(name, cookie, userid) {
     let axios = create();
     let G_courseId = "";
     let G_courseTimer = null;
@@ -23,6 +23,7 @@ function autoLearn(name, cookie) {
 
     //获取选择的课程列表,并切换到第一个课程并更新学习记录
     function getAllCourse() {
+        G_courseId = "";
         return axios
             .get("https://www.cdjxjy.com/student/SelectCourseRecord.aspx")
             .then((res) => {
@@ -52,6 +53,12 @@ function autoLearn(name, cookie) {
                 G_courseId = str[0];
 
                 console.log(name, "正在学习：", str[0]);
+
+                //获取课程信息
+                const tips = res.data.match(
+                    /您本学年应修网上课程.*学分，已获得.*学时，已选网上课程.*学时，还需要选择.*学时的课程/
+                );
+                upsertUserData({userid, tips: tips[0]})
             })
             .catch((err) => {
                 console.log(name);
@@ -136,7 +143,11 @@ function start() {
         if (!isStop) {
             data.forEach((item) => {
                 //开始学习
-                let fn = autoLearn(item.username, item.userCookies);
+                let fn = autoLearn(
+                    item.username,
+                    item.userCookies,
+                    item.userid
+                );
                 stopList.push(fn);
             });
         }

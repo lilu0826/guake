@@ -24,12 +24,12 @@ export function getAllData() {
 }
 
 //插入和新增数据
-export function upsertUserData({ userid, userCookies, username }) {
+export function upsertUserData({ userid, ...rest }) {
     // 这里的 userInfo 是一个对象，包含了要更新或添加的用户数据
     return new Promise((resolve, reject) => {
         db.update(
             { userid: userid },
-            { $set: { username, userCookies } },
+            { $set: rest },
             { upsert: true },
             function (err, numAffected, affectedDocuments, upsert) {
                 if (err) {
