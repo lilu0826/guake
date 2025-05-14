@@ -27,6 +27,12 @@ function autoLearn(name, cookie, userid) {
         return axios
             .get("https://www.cdjxjy.com/student/SelectCourseRecord.aspx")
             .then((res) => {
+                //获取课程信息
+                const tips = res.data.match(
+                    /您本学年应修网上课程.*学分，已获得.*学时，已选网上课程.*学时，还需要选择.*学时的课程/
+                );
+                upsertUserData({ userid, tips: tips[0] });
+
                 //获取课程ID
                 let str = res.data.match(/DeleteStudentCourse\((.*)\,\'.*/);
 
@@ -53,12 +59,6 @@ function autoLearn(name, cookie, userid) {
                 G_courseId = str[0];
 
                 console.log(name, "正在学习：", str[0]);
-
-                //获取课程信息
-                const tips = res.data.match(
-                    /您本学年应修网上课程.*学分，已获得.*学时，已选网上课程.*学时，还需要选择.*学时的课程/
-                );
-                upsertUserData({userid, tips: tips[0]})
             })
             .catch((err) => {
                 console.log(name);
