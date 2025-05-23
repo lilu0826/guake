@@ -11,8 +11,8 @@ RUN npm install
 # 拷贝源代码
 COPY . .
 
-# 暴露端口（如果你使用 3000 端口）
-EXPOSE 3000
+# 暴露端口（如果你使用 8081 端口）
+EXPOSE 8081
 
 # 启动应用
 CMD ["node", "index.js"]
