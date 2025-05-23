@@ -1,5 +1,5 @@
 # 使用官方 Node.js LTS 镜像
-FROM node:18
+FROM node:18-slim
 
 # 创建工作目录
 WORKDIR /app
