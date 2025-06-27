@@ -1,23 +1,12 @@
 // 这里是待选的课程列表，登录后会自动选择这些课程,需要每年更新一次
+//UUID 正则
+//document.documentElement.innerHTML.match(/CoursePlay.aspx\?cid=([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})/g).map(s=>s.slice(-36))
 export default [
-    "ce5eb8b7-7bda-4b7e-be6b-2c36d7a6c07b",
-    "668de828-271a-48b8-aaa1-f2ef3de52ed7",
-    "d0c00d22-e45b-4349-97a4-bd2e946dd7d6",
-    "c36cbc44-ba5d-486e-9592-d4d24d6ed4ff",
-    "ceba4873-6894-482b-98bb-63b8d69b904f",
-    "d74f58da-61e4-45bb-a629-b9ec09bd9679",
-    "e0d0adb8-ccb4-4d0a-a98a-12827256b902",
-    "dcc2a1b3-5ed9-4e69-a5dd-c1165b75a83c",
-    "d7e48f0a-ad62-436c-b67d-8f40b8d6cd83",
-    "d020cd1f-df96-41f5-aebe-8ed2d5f4e8fc",
-    "8e41c330-5f61-4df7-8a59-3b45c38f5302",
-    "07039f5e-7243-45b9-a22c-e3544ac40356",
-    "06c0e4c6-dda5-423a-8f56-9fa4ef7d01c7",
-    "d3deec4e-d2d8-41f4-b4d1-0d4675d306e5",
-    "affde8c9-58dd-4cd2-b18e-3f283b13e352",
-    "1c30e892-7c2a-4264-860a-0ff62e5e8b0e",
-    "d1a40152-a46d-4090-a871-40a01857a7df",
-    "a828de4c-e7ce-405c-93eb-748fac67ead1",
-    "6118470e-f536-4454-a54b-4041373305e6",
-    "70fb4976-5e87-4c57-8a84-9696a6a9fda2",
-];
+    "8a4e1ccf-1119-4e72-a099-5f07e8ff4471",
+    "f7afdb47-8a00-4e9f-9678-818a4e72a568",
+    "1ab044f1-59f6-4234-bfa4-e1e44bc6a61e",
+    "271d000f-5427-47dd-a914-d1fb08045424",
+    "c424316d-4b10-4129-8f28-d5fd55f75f94",
+    "c34f011d-de31-46e2-a981-f14459e3d478",
+    "40b86ecf-230f-4b48-b5cd-f4538cc7500b"
+]
