@@ -5,9 +5,10 @@ process.on("uncaughtException", function (err) {
 
 const originalConsoleLog = console.log;
 console.log = function log(...args) {
-  const time = new Date().toLocaleString();
+  const time = new Date().toLocaleString('zh-CN');
   originalConsoleLog(`[${time}]`, ...args);
 }
+
 
 import { createLoginToUrl } from "./utils/login.js";
 import express from "express";
