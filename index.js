@@ -3,6 +3,12 @@ process.on("uncaughtException", function (err) {
     console.log(err.message);
 });
 
+const originalConsoleLog = console.log;
+console.log = function log(...args) {
+  const time = new Date().toLocaleString();
+  originalConsoleLog(`[${time}]`, ...args);
+}
+
 import { createLoginToUrl } from "./utils/login.js";
 import express from "express";
 import compression from "compression";
