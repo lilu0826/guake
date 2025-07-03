@@ -4,9 +4,9 @@ process.on("uncaughtException", function (err) {
 });
 
 const originalConsoleLog = console.log;
-console.log = function log(...args) {
+console.log = function log(message, ...args) {
   const time = new Date().toLocaleString('zh-CN');
-  originalConsoleLog(`[${time}]`, ...args);
+  originalConsoleLog(`[${time}] ${message}`, ...args);
 }
 
 
