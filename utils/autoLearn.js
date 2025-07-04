@@ -82,8 +82,7 @@ function autoLearn(name, cookie, userid) {
                         )
                         .then((res) => {
                             if (res.data.state === "success") {
-                                console.log(name);
-                                console.log(res.data);
+                                console.log(name, res.data);
                             }
                         });
                 }
@@ -104,8 +103,7 @@ function autoLearn(name, cookie, userid) {
                             `selectclassid=${courseId}`
                         )
                         .then((res) => {
-                            console.log(name);
-                            console.log(res.data);
+                            console.log(name,res.data);
                         });
                 }
             });

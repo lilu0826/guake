@@ -29,7 +29,7 @@ async function selectCourse(Cookie) {
                 },
             }
         );
-        console.log(res.data);
+        console.log("选课",courseid,res.data);
     }
 }
 
