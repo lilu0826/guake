@@ -1,142 +1,97 @@
 import pkg from "axios";
 import courseidList from "../data/courseList.js";
 import { restart } from "./autoLearn.js";
-import { upsertUserData } from "../data/db.js";
-import jsqr from "jsqr";
-import sharp from "sharp";
-
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
+import { upsertUserData, getAllData } from "../data/db.js";
+import { v4 as uuidv4 } from "uuid";
+function generateUUIDWithoutDash() {
+    return uuidv4().replace(/-/g, "");
+}
+function getId() {
+    return +new Date() + "n" + Math.ceil(1e3 * Math.random());
+}
 
 //配置axios请求实例
 const { create } = pkg;
 let axios = create();
-axios.defaults.headers.post["Content-Type"] =
-    "application/x-www-form-urlencoded; charset=UTF-8";
-axios.defaults.headers.post["Referer"] = "https://www.cdjxjy.com";
+axios.defaults.headers.post["Content-Type"] = "application/json;charset=UTF-8";
+axios.defaults.headers.post["Referer"] = "https://www.cdsjxjy.cn/cdcte/";
 axios.defaults.headers.post["Accept-Language"] = "zh-CN,zh;q=0.9,en;q=0.8";
 axios.defaults.headers.post["User-Agent"] =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36";
 
 //执行选课
-async function selectCourse(Cookie) {
+async function selectCourse(userInfo) {
     for (const courseid of courseidList) {
         const res = await axios.post(
-            "https://www.cdjxjy.com/ashx/SelectApi.ashx?a=SelectCourse",
-            "courseid=" + courseid,
+            "https://www.cdsjxjy.cn/prod/stu/student/course/select",
+            { courseId: courseid },
             {
                 headers: {
-                    Cookie: Cookie,
+                    token: userInfo.token,
                 },
             }
         );
-        console.log("选课",courseid,res.data);
+        console.log("选课", courseid, res.data);
     }
 }
 
-//获取用户名和用户id
-async function GetInfo(Cookie) {
-    const res = await axios.post(
-        "https://www.cdjxjy.com/ashx/HomeApi.ashx?a=GetInfo",
-        "",
-        {
-            headers: {
-                Cookie: Cookie,
-            },
-        }
-    );
-    return res.data.data;
-}
-
-//获取选课记录
-async function SelectCourseRecord(Cookie) {
-    const res = await axios.get(
-        "https://www.cdjxjy.com/student/SelectCourseRecord.aspx",
-        {
-            headers: {
-                Cookie: Cookie,
-            },
-            responseType: "text",
-        }
-    );
-    return res.data;
-}
-
-//创建登录二维码
-async function createLogin() {
-    return axios
-        .post("https://www.cdjxjy.com/ashx/BaseApi.ashx?a=CreateLogin")
-        .then((res) => {
-            return res.data;
-        });
-}
-
 //执行选课
-function doUserInfoAndSelectCourse(userCookies) {
-    const userObj = { userCookies };
-    GetInfo(userCookies).then((info) => {
-        userObj.userid = info.UserCode;
-        userObj.username = info.UserName;
-        //执行选课
-        selectCourse(userCookies).then(() => {
-            //更新用户数据库
-            upsertUserData(userObj).then(() => {
-                console.log("更新用户数据库成功");
-                //重新运行
-                restart();
-            });
-        });
-    });
+async function doUserInfoAndSelectCourse(userInfo) {
+    //data结构
+    // {
+    //     "deptId": "B11BDF56-2FE6-483B-9BAA-88A1E638A1A5",
+    //     "deptName": "成都市锦官城小学",
+    //     "deviceId": "78a5f2ceb17e1d9c6351c67bfe6cd422",
+    //     "id": "F7198F84-4911-4A9A-B424-6B6E6FE7ED7D",
+    //     "isStudent": 1,
+    //     "needVerify": 0,
+    //     "realName": "龚婷",
+    //     "token": "b8e27535-e8c5-46a8-a41e-e98acf09c3a1",
+    //     "username": "a18328070408",
+    //     "weakPwd": false
+    // }
+    //执行选课
+    await selectCourse(userInfo);
+    //更新用户数据库
+    await upsertUserData(userInfo);
+    console.log("更新用户数据库成功");
+    //重新运行
+    restart();
 }
 
 //这里直接就登陆了
-async function wxQrloginCheck(codeid) {
+async function wxQrloginCheck({ qrCodeId, deviceId }) {
     return axios
-        .post(
-            "https://www.cdjxjy.com/ashx/weixindispose.ashx?a=wxQrloginCheck",
-            "codeid=" + codeid
-        )
+        .post("https://www.cdsjxjy.cn/prod/loginByQrCode", {
+            qrCodeId,
+            deviceId,
+        })
         .then((res) => {
-            if (res.data.code == 1) {
-                //拿到logincookie以及sessionId
-                const hs = res.headers["set-cookie"].map((c) => {
-                    return c.substring(0, c.indexOf(";"));
-                });
-                hs.push("login_type_from=person");
-                const userCookies = hs.join(";");
-                console.log("userCookies", userCookies);
-                doUserInfoAndSelectCourse(userCookies);
+            console.log("wxQrloginCheck", res.data);
+            let data = res.data.data;
+            if (data) {
+                //登录成功老师
+                //执行选课
+                doUserInfoAndSelectCourse(data);
             }
-            return res.data;
+            return Boolean(data);
         });
 }
 
-async function getImageCode(buffer) {
-    const image = await sharp(buffer);
-    const metadata = await image.metadata();
-    const { width, height } = metadata;
-    // 获取原始位图数据（raw buffer）
-    const imgData = await image
-        .raw()
-        .ensureAlpha() // 保证有 alpha 通道，避免不同图片格式返回不同通道数
-        .toBuffer();
-    const code = jsqr(imgData, width, height);
-    return code?.data || "";
-}
-
 async function createLoginToUrl() {
-    const res = await axios.post(
-        "https://www.cdjxjy.com/ashx/BaseApi.ashx?a=CreateLogin"
-    );
-    const qrCodeUrl = "https://www.cdjxjy.com/" + res.data.ImageUrl;
-    const codeid = res.data.codeid;
-    const buffer = await axios.get(qrCodeUrl, {
-        responseType: "arraybuffer",
-    });
-    const code = await getImageCode(buffer.data);
+    const qrCodeId = getId();
+    const deviceId = generateUUIDWithoutDash();
+    const loginUrl =
+        "https://wx.cdsjxjy.cn/#/pages/login/openIdLogin?qrCodeId=" +
+        qrCodeId +
+        "&deviceId=" +
+        deviceId;
+
     // 轮询登录状态
     // 这里可以使用轮询函数来检查登录状态
-    pollingLoginStatus(codeid);
-    return { code, codeid };
+    pollingLoginStatus({ qrCodeId, deviceId });
+    console.log("loginUrl", loginUrl);
+    return { loginUrl };
 }
 
 async function poll(
@@ -166,21 +121,8 @@ async function poll(
     }
 }
 
-function pollingLoginStatus(codeid) {
-    poll(
-        async () => {
-            const data = await wxQrloginCheck(codeid);
-            console.log("当前状态:", data);
-            return data.code === 1; // 返回 true 表示轮询完成
-        },
-        3000,
-        10
-    );
+function pollingLoginStatus({ qrCodeId, deviceId }) {
+    poll(() => wxQrloginCheck({ qrCodeId, deviceId }), 3000, 10);
 }
 
-export {
-    createLogin,
-    wxQrloginCheck,
-    SelectCourseRecord,
-    createLoginToUrl,
-};
+export { createLoginToUrl };

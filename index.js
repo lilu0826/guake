@@ -25,20 +25,15 @@ app.set("view engine", "ejs");
 //获取状态
 app.get("/", async function (req, res) {
     const data = await getAllData();
-    data.forEach((item) => {
-        item.tips = item.tips.replace("还需要选择", "还需要学习");
-    });
-    const usernames = data.map((item) => item.username).reverse();
-    const completed = data.map((el) => el.tips.match(/\d+\.?\d*/g)[1]).reverse();
-    const uncompleted = data.map((el) => el.tips.match(/\d+\.?\d*/g)[3]).reverse();
-    res.render("index", { data: data, usernames, completed, uncompleted });
+    const finishedList = data.filter(el => el.NotEndCount == 0)
+    const unFinishedList = data.filter(el => el.NotEndCount != 0)
+    res.render("index", {finishedList,unFinishedList });
 });
 
 //直接重定向登录，由后端跟踪登录状态
 app.get("/login", async function (req, res) {
-    const { code } = await createLoginToUrl();
-    console.log("二维码内容:", code);
-    res.redirect(302, code);
+    const { loginUrl } = await createLoginToUrl();
+    res.redirect(302, loginUrl);
 });
 
 var server = app.listen(8081, function () {

@@ -18,7 +18,7 @@ export function getAllData() {
                 console.error("Error finding documents:", err);
                 reject(err);
             } else {
-                const result = docs.sort((a, b) => pinyin.compare(a.username, b.username));
+                const result = docs.sort((a, b) => pinyin.compare(a.realName, b.realName));
                 resolve(result);
             }
         });
@@ -26,11 +26,11 @@ export function getAllData() {
 }
 
 //插入和新增数据
-export function upsertUserData({ userid, ...rest }) {
+export function upsertUserData({ username, ...rest }) {
     // 这里的 userInfo 是一个对象，包含了要更新或添加的用户数据
     return new Promise((resolve, reject) => {
         db.update(
-            { userid: userid },
+            { username: username },
             { $set: rest },
             { upsert: true },
             function (err, numAffected, affectedDocuments, upsert) {

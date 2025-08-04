@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>加油奥里给</title>
-    <script src="/public/echarts.min.js"></script>
     <style>
         @font-face {
             font-family: 'Orbitron';
@@ -45,22 +44,12 @@
             text-shadow: 0 0 10px #00f0ff;
         }
 
-        #tips {
+        .tips {
             text-align: center;
             margin: 20px 0;
             font-size: 18px;
             color: #ffde59;
         }
-
-        #chart {
-            height: 400px;
-            width: 100%;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            backdrop-filter: blur(8px);
-        }
-
         .list {
             margin-top: 20px;
             padding: 10px;
@@ -68,20 +57,20 @@
             border-radius: 12px;
         }
 
-        #list ul {
+        .list ul {
             list-style: none;
             padding: 0;
         }
 
-        #list li {
+        .list li {
             margin: 10px 0;
             padding: 10px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 8px;
         }
 
-        #power {
-            text-align: center;
+        .power {
+            text-align: right;
             margin-top: 30px;
             font-size: 14px;
             color: #a0c4ff;
@@ -94,10 +83,6 @@
             body {
                 padding: 10px;
             }
-
-            #chart {
-                height: 400px;
-            }
         }
     </style>
 </head>
@@ -108,93 +93,34 @@
         没有你的名字？点击👉<a href="/login">这里👈</a>一键登录
     </h4>
 
-    <div id="tips">共有<%= data.length %>名老师正在学习中👇</div>
+    <div class="tips">共有<%= unFinishedList.length %>名老师正在学习中👇</div>
 
-    <div id="chart"></div>
-
-    <div class="list" id="list">
+    <div class="list">
         <ul>
-            <% data.forEach(item=> { %>
-                <li><b><%=item.username%></b>老师<br><%=item.tips%></li>
+            <% unFinishedList.forEach(item=> { %>
+                <li><b><%=item.realName%></b>老师<br>
+                    已选课程<%=item.TotalCount%>个,
+                    已完成<%=item.EndCount%>个,
+                    未完成<%=item.NotEndCount%>个
+                </li>
             <% }) %>
         </ul>
     </div>
 
-    <div id="power">--- develop by 帅哥程序猿 💻</div>
+    <div class="tips">共有<%= finishedList.length %>名老师已完成学习👇</div>
 
-    <script>
-        function drawChart() {
-            var chartDom = document.getElementById("chart");
-            var myChart = echarts.init(chartDom);
-            var option;
+    <div class="list">
+        <ul>
+            <% finishedList.forEach(item=> { %>
+                <li><b><%=item.realName%></b>老师<br>
+                    已选课程<%=item.TotalCount%>个,
+                    已完成<%=item.EndCount%>个,
+                    未完成<%=item.NotEndCount%>个
+                </li>
+            <% }) %>
+        </ul>
+    </div>
 
-            option = {
-                backgroundColor: 'transparent',
-                tooltip: {
-                    trigger: "axis",
-                    axisPointer: { type: "shadow" },
-                },
-                legend: {
-                    textStyle: { color: '#fff' }
-                },
-                grid: {
-                    left: '5%',
-                    right: '5%',
-                    bottom: '5%',
-                    containLabel: true
-                },
-                yAxis: {
-                    type: "category",
-                    data: <%- JSON.stringify(usernames) %>,
-                    axisLine: { show: false },
-                    axisTick: { show: false },
-                    axisLabel: {
-                        color: "#fff",
-                        fontSize: 12
-                    }
-                },
-                xAxis: {
-                    type: "value",
-                    axisLine: { show: false },
-                    axisLabel: {
-                        color: "#fff",
-                        fontSize: 12
-                    },
-                    splitLine: {
-                        show: false
-                    }
-                },
-                series: [
-                    {
-                        name: "已完成课时",
-                        data: <%- JSON.stringify(completed) %>,
-                        type: "bar",
-                        stack: "total",
-                        itemStyle: {
-                            color: "#00f0ff"
-                        }
-                    },
-                    {
-                        name: "未完成课时",
-                        data: <%- JSON.stringify(uncompleted) %>,
-                        type: "bar",
-                        stack: "total",
-                        itemStyle: {
-                            color: "#ff7676"
-                        }
-                    }
-                ]
-            };
-
-            option && myChart.setOption(option);
-
-            window.addEventListener("resize", function () {
-                myChart.resize();
-            });
-
-        }
-
-        document.addEventListener("DOMContentLoaded", drawChart);
-    </script>
+    <div class="power">--- develop by 帅哥程序猿 💻</div>
 </body>
 </html>
