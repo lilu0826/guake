@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node ./index.js",
-    "dev": "node --watch ./index.js"
+    "dev": "nodemon ./index.js"
   },
   "author": "",
   "license": "ISC",
@@ -17,6 +17,7 @@
     "express": "^4.19.2",
     "jsqr": "^1.4.0",
     "nedb": "^1.8.0",
+    "nodemon": "^3.1.10",
     "pinyin": "^3.1.0",
     "python-shell": "^5.0.0",
     "sharp": "^0.34.1",

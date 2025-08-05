@@ -1,6 +1,9 @@
 # 使用官方的 Node.js 镜像作为基础镜像
 FROM node:22.12.0-alpine3.20
 
+# 安装 ca-certificates
+RUN apk add --no-cache ca-certificates && update-ca-certificates
+
 # 创建工作目录
 WORKDIR /app
 
