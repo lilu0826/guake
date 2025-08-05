@@ -26,7 +26,7 @@ function autoLearn({ realName, token, username }) {
         //   "NotEndCount": 1 //未完成
         // }
         console.log(realName, "课程统计：", res.data.data);
-        let tips = `登陆状态错误，需要重新登陆！`
+        let tips = `登陆状态错误，需要重新登陆！`;
         if (res.data.data) {
             const { TotalCount, EndCount, NotEndCount } = res.data.data;
             tips = `已选课程${TotalCount}个,已完成${EndCount}个,未完成${NotEndCount}个`;
@@ -155,7 +155,7 @@ function autoLearn({ realName, token, username }) {
         const courseList = await getCourseList();
         //这里应该过滤掉已经学完的课程 TODO
         for (const course of courseList) {
-            const {selectId,requiredTime} = course;
+            const { selectId, requiredTime } = course;
             const { sessionId, recordFinished, watchingFinished } =
                 await startCourse(selectId);
             if (!recordFinished) {
@@ -165,9 +165,17 @@ function autoLearn({ realName, token, username }) {
             if (!watchingFinished) {
                 //跟踪学习记录
                 while (true) {
-                    const { creditObtained, verifyCode, watchingFinished,duration } =
-                        await trackCourse(sessionId);
-                    if (creditObtained || watchingFinished || duration >= requiredTime) {
+                    const {
+                        creditObtained,
+                        verifyCode,
+                        watchingFinished,
+                        duration,
+                    } = await trackCourse(sessionId);
+                    if (
+                        creditObtained ||
+                        watchingFinished ||
+                        duration >= requiredTime
+                    ) {
                         //学分获得
                         break;
                     }
@@ -187,8 +195,6 @@ function autoLearn({ realName, token, username }) {
     }
 
     (async () => {
-        const MAX_RETRY_COUNT = 5;
-        let retryCount = 0;
         while (true) {
             try {
                 await study();
@@ -199,17 +205,7 @@ function autoLearn({ realName, token, username }) {
                     console.log(realName, "学习取消");
                     break;
                 }
-                retryCount++;
-                if (retryCount > MAX_RETRY_COUNT) {
-                    console.log(realName, "学习失败");
-                    break;
-                }
-                console.log(
-                    realName,
-                    "学习出错，正在重试！",
-                    retryCount,
-                    error.message
-                );
+                console.log(realName, "学习出错，正在重试！", error.message);
                 await delay(5000);
             }
         }
