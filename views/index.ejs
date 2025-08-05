@@ -93,34 +93,16 @@
         没有你的名字？点击👉<a href="/login">这里👈</a>一键登录
     </h4>
 
-    <div class="tips">共有<%= unFinishedList.length %>名老师正在学习中👇</div>
+    <div class="tips">共有<%= data.length %>名老师正在学习中👇</div>
 
     <div class="list">
         <ul>
-            <% unFinishedList.forEach(item=> { %>
-                <li><b><%=item.realName%></b>老师<br>
-                    已选课程<%=item.TotalCount%>个,
-                    已完成<%=item.EndCount%>个,
-                    未完成<%=item.NotEndCount%>个
+            <% data.forEach(item=> { %>
+                <li><b><%=item.realName%></b>老师<br><%=item.tips%>
                 </li>
             <% }) %>
         </ul>
     </div>
-
-    <div class="tips">共有<%= finishedList.length %>名老师已完成学习👇</div>
-
-    <div class="list">
-        <ul>
-            <% finishedList.forEach(item=> { %>
-                <li><b><%=item.realName%></b>老师<br>
-                    已选课程<%=item.TotalCount%>个,
-                    已完成<%=item.EndCount%>个,
-                    未完成<%=item.NotEndCount%>个
-                </li>
-            <% }) %>
-        </ul>
-    </div>
-
     <div class="power">--- develop by 帅哥程序猿 💻</div>
 </body>
 </html>

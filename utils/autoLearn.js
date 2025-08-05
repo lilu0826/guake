@@ -25,13 +25,19 @@ function autoLearn({ realName, token, username }) {
         //   "EndCount": 0,   //已完成
         //   "NotEndCount": 1 //未完成
         // }
-        console.log(realName,"课程统计：", res.data.data);
+        console.log(realName, "课程统计：", res.data.data);
+        let tips = `登陆状态错误，需要重新登陆！`
+        if (res.data.data) {
+            const { TotalCount, EndCount, NotEndCount } = res.data.data;
+            tips = `已选课程${TotalCount}个,已完成${EndCount}个,未完成${NotEndCount}个`;
+        }
         upsertUserData({
             username,
             TotalCount: 0,
             EndCount: 0,
             NotEndCount: 0,
             ...res.data.data,
+            tips,
         });
         return res.data.data;
     }
@@ -46,7 +52,7 @@ function autoLearn({ realName, token, username }) {
                 pageSize: TotalCount,
             }
         );
-        console.log(realName,"获取课程个数：", res.data.data.content.length);
+        console.log(realName, "获取课程个数：", res.data.data.content.length);
         return res.data.data.content;
     }
 
@@ -73,7 +79,7 @@ function autoLearn({ realName, token, username }) {
             //开始新课程
             return startCourse(selectId);
         }
-        console.log(realName,"开始学习课程：",selectId, res.data.data);
+        console.log(realName, "开始学习课程：", selectId, res.data.data);
         return res.data.data;
     }
 
@@ -85,7 +91,12 @@ function autoLearn({ realName, token, username }) {
                 sessionId,
             }
         );
-        console.log(realName,"结束学习课程：",sessionId, res.data.code == 200);
+        console.log(
+            realName,
+            "结束学习课程：",
+            sessionId,
+            res.data.code == 200
+        );
         return res.data.code == 200;
     }
 
@@ -103,7 +114,7 @@ function autoLearn({ realName, token, username }) {
         //     "verifyCode": "3465", // 验证码
         //     "duration": 2007 //学习时长
         // }
-        console.log(realName,"跟踪学习时长：",sessionId, res.data.data);
+        console.log(realName, "跟踪学习时长：", sessionId, res.data.data);
         return res.data.data;
     }
 
@@ -116,7 +127,13 @@ function autoLearn({ realName, token, username }) {
                 verifyCode,
             }
         );
-        console.log(realName,"发送验证码：",sessionId, verifyCode,res.data.code == 200);
+        console.log(
+            realName,
+            "发送验证码：",
+            sessionId,
+            verifyCode,
+            res.data.code == 200
+        );
         return res.data.code == 200;
     }
 
@@ -130,7 +147,7 @@ function autoLearn({ realName, token, username }) {
                 courseContent: "好",
             }
         );
-        console.log(realName,"添加学习记录：",selectId, res.data.code == 200);
+        console.log(realName, "添加学习记录：", selectId, res.data.code == 200);
         return res.data.code == 200;
     }
 
@@ -138,7 +155,7 @@ function autoLearn({ realName, token, username }) {
         const courseList = await getCourseList();
         //这里应该过滤掉已经学完的课程 TODO
         for (const course of courseList) {
-            const selectId = course.selectId;
+            const {selectId,requiredTime} = course;
             const { sessionId, recordFinished, watchingFinished } =
                 await startCourse(selectId);
             if (!recordFinished) {
@@ -148,9 +165,9 @@ function autoLearn({ realName, token, username }) {
             if (!watchingFinished) {
                 //跟踪学习记录
                 while (true) {
-                    const { creditObtained, verifyCode, watchingFinished } =
+                    const { creditObtained, verifyCode, watchingFinished,duration } =
                         await trackCourse(sessionId);
-                    if (creditObtained || watchingFinished) {
+                    if (creditObtained || watchingFinished || duration >= requiredTime) {
                         //学分获得
                         break;
                     }
@@ -175,16 +192,16 @@ function autoLearn({ realName, token, username }) {
         while (true) {
             try {
                 await study();
-                console.log(realName,"学习完成");
+                console.log(realName, "学习完成");
                 break;
             } catch (error) {
                 if (error.message == "canceled") {
-                    console.log(realName,"学习取消");
+                    console.log(realName, "学习取消");
                     break;
                 }
                 retryCount++;
                 if (retryCount > MAX_RETRY_COUNT) {
-                    console.log(realName,"学习失败");
+                    console.log(realName, "学习失败");
                     break;
                 }
                 console.log(

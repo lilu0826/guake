@@ -4,10 +4,9 @@ process.on("uncaughtException", function (err) {
 
 const originalConsoleLog = console.log;
 console.log = function log(message, ...args) {
-  const time = new Date().toLocaleString('zh-CN');
-  originalConsoleLog(`[${time}] ${message}`, ...args);
-}
-
+    const time = new Date().toLocaleString("zh-CN");
+    originalConsoleLog(`[${time}] ${message}`, ...args);
+};
 
 import { createLoginToUrl } from "./utils/login.js";
 import express from "express";
@@ -24,9 +23,7 @@ app.set("view engine", "ejs");
 //获取状态
 app.get("/", async function (req, res) {
     const data = await getAllData();
-    const finishedList = data.filter(el => el.NotEndCount == 0)
-    const unFinishedList = data.filter(el => el.NotEndCount != 0)
-    res.render("index", {finishedList,unFinishedList });
+    res.render("index", { data });
 });
 
 //直接重定向登录，由后端跟踪登录状态
