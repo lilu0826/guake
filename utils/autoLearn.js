@@ -186,8 +186,10 @@ function autoLearn({ realName, token, username }) {
                     await delay(5000);
                 }
             }
-            //学习完了直接结束掉当前课程
-            await endCourse(sessionId);
+            if (sessionId) {
+                //学习完了直接结束掉当前课程
+                await endCourse(sessionId);
+            }
 
             //更新课程统计信息
             await getCourseDatasts();
