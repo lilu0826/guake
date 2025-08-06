@@ -63,7 +63,7 @@ async function doUserInfoAndSelectCourse(userInfo) {
 async function wxQrloginCheck({ qrCodeId, deviceId }) {
     return axios
         .post("https://www.cdsjxjy.cn/prod/loginByQrCode", {
-            qrCodeId,
+            qrcodeId:qrCodeId,
             deviceId,
         })
         .then((res) => {
