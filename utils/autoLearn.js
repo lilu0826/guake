@@ -1,5 +1,5 @@
 import pkg from "axios";
-import { getAllData, upsertUserData } from "../data/db.js";
+import { getAllData, upsertUserData } from "./db.js";
 const { create } = pkg;
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 function autoLearn({ realName, token, username }) {

@@ -1,8 +1,8 @@
 import pkg from "axios";
-import courseidList from "../data/courseList.js";
 import { restart } from "./autoLearn.js";
-import { upsertUserData, getAllData } from "../data/db.js";
+import { upsertUserData, getAllData } from "./db.js";
 import { v4 as uuidv4 } from "uuid";
+import fs from "fs";
 function generateUUIDWithoutDash() {
     return uuidv4().replace(/-/g, "");
 }
@@ -10,6 +10,24 @@ function getId() {
     return +new Date() + "n" + Math.ceil(1e3 * Math.random());
 }
 
+let courseidList = [];
+try {
+    courseidList = fs
+        .readFileSync("data/courses.txt", "utf-8")
+        .replace(/\r\n/g, "\n")
+        .split("\n") // 把 CRLF 转 LF.split("\r?\n");
+        .filter((line) => line.trim() !== "") // 去掉空行
+        .map((line) => line.trim()); // 去掉前后空格
+} catch (error) {
+    console.log(
+        "读取课程列表失败,不能自动选课哦!请创建data/courses.txt文件,内容为文件ID一行一个",
+        error?.message
+    );
+    //自动创建
+    fs.writeFileSync("data/courses.txt", "");
+}
+
+console.log("courseidList", courseidList);
 //配置axios请求实例
 const { create } = pkg;
 let axios = create();
@@ -63,7 +81,7 @@ async function doUserInfoAndSelectCourse(userInfo) {
 async function wxQrloginCheck({ qrCodeId, deviceId }) {
     return axios
         .post("https://www.cdsjxjy.cn/prod/loginByQrCode", {
-            qrcodeId:qrCodeId,
+            qrcodeId: qrCodeId,
             deviceId,
         })
         .then((res) => {

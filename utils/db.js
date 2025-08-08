@@ -5,9 +5,8 @@ import pkg from "pinyin";
 const { pinyin } = pkg;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const db = new NeDB({
-    filename: path.join(__dirname, "user.db"),
+    filename: path.join(__dirname, "../data/user.db"),
     autoload: true,
 });
 // 获取所有数据

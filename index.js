@@ -11,7 +11,7 @@ console.log = function log(message, ...args) {
 import { createLoginToUrl } from "./utils/login.js";
 import express from "express";
 import compression from "compression";
-import { getAllData } from "./data/db.js";
+import { getAllData } from "./utils/db.js";
 
 var app = express();
 app.use(compression());
