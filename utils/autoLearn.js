@@ -14,6 +14,38 @@ function autoLearn({ realName, token, username }) {
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36";
     axios.defaults.signal = controller.signal;
 
+    async function generateCourseComment(name) {
+        try {
+            const res = await axios.post(
+                "https://api.hunyuan.cloud.tencent.com/v1/chat/completions",
+                {
+                    messages: [
+                        {
+                            role: "user",
+                            content: `课程名称:${name}
+                            你是一名教师，现在正在学习上诉课程的教学内容，
+                            请帮忙写一个简短的课程学习感受，主要是教学技巧等，
+                            要100字左右，
+                            纯文本输出。
+                            要求:不要markdown标记`,
+                        },
+                    ],
+                    model: "hunyuan-lite",
+                },
+                {
+                    headers: {
+                        Authorization:
+                            "Bearer sk-S1vOklie4GCzcjbcNkNnZtKEsAokoR0DokmTlnpf6tHCE5MD",
+                        "content-type": "application/json; charset=utf-8",
+                    },
+                }
+            );
+            return res.data.choices[0].message.content;
+        } catch (error) {
+            return "好";
+        }
+    }
+
     //获取课程统计信息
     async function getCourseDatasts() {
         const res = await axios.post(
@@ -138,13 +170,13 @@ function autoLearn({ realName, token, username }) {
     }
 
     // 添加学习记录
-    async function addRecord(selectId) {
+    async function addRecord(selectId,content="好") {
         const res = await axios.post(
             "https://www.cdsjxjy.cn/prod/stu/learning/record",
             {
                 selectId,
-                feeling: "好",
-                courseContent: "好",
+                feeling: content,
+                courseContent: content,
             }
         );
         console.log(realName, "添加学习记录：", selectId, res.data.code == 200);
@@ -160,7 +192,8 @@ function autoLearn({ realName, token, username }) {
                 await startCourse(selectId);
             if (!recordFinished) {
                 // 添加学习记录
-                addRecord(selectId);
+                const content = await generateCourseComment(course.courseName);
+                await addRecord(selectId, content);
             }
             if (!watchingFinished) {
                 //跟踪学习记录
