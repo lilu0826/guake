@@ -98,7 +98,7 @@ function autoLearn({ realName, token, username }) {
         );
         // {
         //     "hasOther": false,
-        //     "sessionId": "aa02acedb0e1440b8648cfbbd14c4437",
+        //     "sessionId": "xxxxxxxxxxxxxxxxxxxxxxxx",
         //     "watchingFinished": false,
         //     "requiredTime": 2400,
         //     "duration": 1124,

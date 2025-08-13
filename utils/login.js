@@ -1,6 +1,6 @@
 import pkg from "axios";
 import { restart } from "./autoLearn.js";
-import { upsertUserData, getAllData } from "./db.js";
+import { upsertUserData } from "./db.js";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 function generateUUIDWithoutDash() {
@@ -55,19 +55,6 @@ async function selectCourse(userInfo) {
 
 //执行选课
 async function doUserInfoAndSelectCourse(userInfo) {
-    //data结构
-    // {
-    //     "deptId": "B11BDF56-2FE6-483B-9BAA-88A1E638A1A5",
-    //     "deptName": "成都市锦官城小学",
-    //     "deviceId": "78a5f2ceb17e1d9c6351c67bfe6cd422",
-    //     "id": "F7198F84-4911-4A9A-B424-6B6E6FE7ED7D",
-    //     "isStudent": 1,
-    //     "needVerify": 0,
-    //     "realName": "龚婷",
-    //     "token": "b8e27535-e8c5-46a8-a41e-e98acf09c3a1",
-    //     "username": "a18328070408",
-    //     "weakPwd": false
-    // }
     //执行选课
     await selectCourse(userInfo);
     //更新用户数据库
@@ -88,7 +75,7 @@ async function wxQrloginCheck({ qrCodeId, deviceId }) {
             console.log("wxQrloginCheck", res.data);
             let data = res.data.data;
             if (data) {
-                //登录成功老师
+                //登录成功
                 //执行选课
                 doUserInfoAndSelectCourse(data);
             }
