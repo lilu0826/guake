@@ -14,6 +14,15 @@ function autoLearn({ realName, token, username }) {
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36";
     axios.defaults.signal = controller.signal;
 
+    //获取学习配置
+    async function getStudyConfig() {
+        const res = await axios.get(
+            "https://www.cdsjxjy.cn/prod/stu/student/study/config/get"
+        );
+        console.log(realName, "获取学习配置：", res.data.data);
+        return res.data.data;
+    }
+
     async function generateCourseComment(name) {
         try {
             const res = await axios.post(
@@ -23,7 +32,7 @@ function autoLearn({ realName, token, username }) {
                         {
                             role: "user",
                             content: `课程名称:${name}
-                            你是一名教师，现在正在学习上诉课程的教学内容，
+                            你是一名教师，现在正在学习上述课程的教学内容，
                             请帮忙写一个简短的课程学习感受，主要是教学技巧等，
                             要100字左右，
                             纯文本输出。
@@ -170,7 +179,7 @@ function autoLearn({ realName, token, username }) {
     }
 
     // 添加学习记录
-    async function addRecord(selectId,content="好") {
+    async function addRecord(selectId, content = "好") {
         const res = await axios.post(
             "https://www.cdsjxjy.cn/prod/stu/learning/record",
             {
@@ -184,6 +193,7 @@ function autoLearn({ realName, token, username }) {
     }
 
     async function study() {
+        const config = await getStudyConfig();
         const courseList = await getCourseList();
         //这里应该过滤掉已经学完的课程 TODO
         for (const course of courseList) {
@@ -216,7 +226,7 @@ function autoLearn({ realName, token, username }) {
                         //发送验证码
                         await verifyCourse(sessionId, verifyCode);
                     }
-                    await delay(5000);
+                    await delay(1000 * config.interval);
                 }
             }
             if (sessionId) {
