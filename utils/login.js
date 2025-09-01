@@ -10,24 +10,7 @@ function getId() {
     return +new Date() + "n" + Math.ceil(1e3 * Math.random());
 }
 
-let courseidList = [];
-try {
-    courseidList = fs
-        .readFileSync("data/courses.txt", "utf-8")
-        .replace(/\r\n/g, "\n")
-        .split("\n") // 把 CRLF 转 LF.split("\r?\n");
-        .filter((line) => line.trim() !== "") // 去掉空行
-        .map((line) => line.trim()); // 去掉前后空格
-} catch (error) {
-    console.log(
-        "读取课程列表失败,不能自动选课哦!请创建data/courses.txt文件,内容为文件ID一行一个",
-        error?.message
-    );
-    //自动创建
-    fs.writeFileSync("data/courses.txt", "");
-}
-
-console.log("courseidList", courseidList);
+const MAX_PERIOD = 20;
 //配置axios请求实例
 const { create } = pkg;
 let axios = create();
@@ -39,17 +22,75 @@ axios.defaults.headers.post["User-Agent"] =
 
 //执行选课
 async function selectCourse(userInfo) {
-    for (const courseid of courseidList) {
-        const res = await axios.post(
-            "https://www.cdsjxjy.cn/prod/stu/student/course/select",
-            { courseId: courseid },
-            {
-                headers: {
-                    token: userInfo.token,
+    //用户信息
+    const student = await axios.get(
+        `https://www.cdsjxjy.cn/prod/stu/student/getStudent?id=${userInfo.id}`,
+        {
+            headers: {
+                token: userInfo.token,
+            },
+        }
+    );
+    //用户已选课程
+    const selected = await axios.post(
+        "https://www.cdsjxjy.cn/prod/stu/student/course/page/selected",
+        {
+            pageNum: 1,
+            pageSize: 50,
+        },
+        {
+            headers: {
+                token: userInfo.token,
+            },
+        }
+    );
+    //已选课程
+    console.log("已选课程：", selected.data.data.content.length);
+    let currentPeriod = selected.data.data.content.reduce(
+        (pre, cur) => pre + cur.period,
+        0
+    );
+    const selectedIds = selected.data.data.content.map((item) => item.id);
+
+    // 待选课程
+    const res = await axios.post(
+        `https://www.cdsjxjy.cn/prod/stu/course/page`,
+        {
+            teachLevel: student.data.data.teachLevel,
+            teachSubject: student.data.data.teachSubject,
+            isDisplay: 0,
+            pageNum: 1,
+            pageSize: 50,
+        },
+        {
+            headers: {
+                token: userInfo.token,
+            },
+        }
+    );
+    console.log("用户待选课程：", res.data.data.content.length);
+    // 开始选课 要求大于20学识
+    for (const element of res.data.data.content) {
+        if (currentPeriod >= MAX_PERIOD) {
+            console.log("当前学时", currentPeriod);
+            break;
+        }
+        if (!selectedIds.includes(element.id)) {
+            console.log("可以选课", element.id);
+            await axios.post(
+                "https://www.cdsjxjy.cn/prod/stu/student/course/select",
+                {
+                    courseId: element.id,
                 },
-            }
-        );
-        console.log("选课", courseid, res.data);
+                {
+                    headers: {
+                        token: userInfo.token,
+                    },
+                }
+            );
+            currentPeriod += element.period;
+            console.log("选课成功，当前学时", currentPeriod);
+        }
     }
 }
 
