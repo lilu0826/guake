@@ -10,8 +10,6 @@ process.on("uncaughtException", function (err) {
 });
 const clientSet = new Set();
 
-let totalLog = "";
-
 const originalConsoleLog = console.log;
 console.log = function (message, ...args) {
     const time = new Date().toLocaleString("zh-CN");
@@ -21,8 +19,6 @@ console.log = function (message, ...args) {
         `[${time}] ${message}\t` +
         args.map((arg) => JSON.stringify(arg, null, 2)).join("\t") +
         "\n";
-
-    totalLog += info;
 
     clientSet.forEach((client) => {
         client.send(info);
@@ -36,7 +32,6 @@ const wss = new WebSocketServer({ server });
 
 wss.on("connection", (ws, req) => {
     clientSet.add(ws);
-    ws.send(totalLog);
     ws.on("close", () => {
         clientSet.delete(ws);
     });
