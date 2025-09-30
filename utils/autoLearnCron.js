@@ -63,6 +63,9 @@ function autoLearn({ realName, token, username }) {
             "https://www.cdsjxjy.cn/prod/stu/student/course/page/datasts",
             {}
         );
+        const creditRes = await axios.get(
+            "https://www.cdsjxjy.cn/prod/stu/student/course/getCredit"
+        );
         // {
         //   "TotalCount": 1, //总数
         //   "EndCount": 0,   //已完成
@@ -72,7 +75,7 @@ function autoLearn({ realName, token, username }) {
         let tips = `登陆状态错误，需要重新登陆！`;
         if (res.data.data) {
             const { TotalCount, EndCount, NotEndCount } = res.data.data;
-            tips = `已选课程${TotalCount}个,已完成${EndCount}个,未完成${NotEndCount}个`;
+            tips = `已选课程${TotalCount}个,已完成${EndCount}个,未完成${NotEndCount}个。视频学习最多获得20个学分，当前已获得：${creditRes.data.data.value}个学分。`;
         }
         upsertUserData({
             username,
