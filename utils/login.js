@@ -105,6 +105,23 @@ async function doUserInfoAndSelectCourse(userInfo) {
     upsert && checkAndRunAutoLearn(userInfo);
 }
 
+async function loginByOpenid({ openid }) {
+    return axios
+        .post("https://www.cdsjxjy.cn/prod/loginByOpenid", {
+            openid,
+        })
+        .then((res) => {
+            console.log("loginByOpenid", res.data);
+            let data = res.data.data;
+            if (data) {
+                //登录成功
+                //执行选课
+                doUserInfoAndSelectCourse(data);
+            }
+            return res.data;
+        });
+}
+
 //这里直接就登陆了
 async function wxQrloginCheck({ qrCodeId, deviceId }) {
     return axios
@@ -171,4 +188,4 @@ function pollingLoginStatus({ qrCodeId, deviceId }) {
     poll(() => wxQrloginCheck({ qrCodeId, deviceId }), 3000, 10);
 }
 
-export { createLoginToUrl };
+export { createLoginToUrl, loginByOpenid };

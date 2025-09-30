@@ -1,4 +1,4 @@
-import { createLoginToUrl } from "./utils/login.js";
+import { createLoginToUrl, loginByOpenid } from "./utils/login.js";
 import express from "express";
 import compression from "compression";
 import { getAllData } from "./utils/db.js";
@@ -23,7 +23,7 @@ console.log = function (message, ...args) {
         "\n";
 
     totalLog += info;
-    
+
     clientSet.forEach((client) => {
         client.send(info);
     });
@@ -56,6 +56,10 @@ app.get("/", async function (req, res) {
 
 //直接重定向登录，由后端跟踪登录状态
 app.get("/login", async function (req, res) {
+    if (req.query.openid) {
+        const data = await loginByOpenid({ openid: req.query.openid });
+        return res.send(data);
+    }
     const { loginUrl } = await createLoginToUrl();
     res.redirect(302, loginUrl);
 });

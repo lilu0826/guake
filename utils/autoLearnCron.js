@@ -197,8 +197,10 @@ function autoLearn({ realName, token, username }) {
     async function study() {
         const courseList = await getCourseList();
         const config = await getStudyConfig();
-        //这里应该过滤掉已经学完的课程 TODO
         for (const course of courseList) {
+            //过滤掉不需要学习的课程
+            if (course.endStatus === 1) continue;
+
             const { selectId, requiredTime } = course;
             const { sessionId, recordFinished, watchingFinished } =
                 await startCourse(selectId);
@@ -207,7 +209,7 @@ function autoLearn({ realName, token, username }) {
                 const content = await enqueue(() =>
                     generateCourseComment(course.courseName)
                 );
-                console.log('content',content)
+                console.log("content", content);
                 await addRecord(selectId, content);
             }
             if (!watchingFinished) {
