@@ -4,6 +4,12 @@ FROM node:22.12.0-alpine3.20
 # 安装 ca-certificates
 RUN apk add --no-cache ca-certificates && update-ca-certificates
 
+# 设置时区
+RUN apk add --no-cache tzdata \
+    && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && echo "Asia/Shanghai" > /etc/timezone \
+    && apk del tzdata
+
 # 创建工作目录
 WORKDIR /app
 

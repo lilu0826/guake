@@ -1,19 +1,47 @@
-process.on("uncaughtException", function (err) {
-    console.log(err.message);
-});
-
-const originalConsoleLog = console.log;
-console.log = function log(message, ...args) {
-    const time = new Date().toLocaleString("zh-CN");
-    originalConsoleLog(`[${time}] ${message}`, ...args);
-};
-
 import { createLoginToUrl } from "./utils/login.js";
 import express from "express";
 import compression from "compression";
 import { getAllData } from "./utils/db.js";
+import { WebSocketServer } from "ws";
+import http from "http";
 
-var app = express();
+process.on("uncaughtException", function (err) {
+    console.log("uncaughtException", err.message);
+});
+const clientSet = new Set();
+
+let totalLog = "";
+
+const originalConsoleLog = console.log;
+console.log = function (message, ...args) {
+    const time = new Date().toLocaleString("zh-CN");
+    originalConsoleLog(`[${time}] ${message}`, ...args);
+
+    let info =
+        `[${time}] ${message}\t` +
+        args.map((arg) => JSON.stringify(arg, null, 2)).join("\t") +
+        "\n";
+
+    totalLog += info;
+    
+    clientSet.forEach((client) => {
+        client.send(info);
+    });
+};
+
+const app = express();
+const server = http.createServer(app);
+// 挂载 WebSocket 服务器
+const wss = new WebSocketServer({ server });
+
+wss.on("connection", (ws, req) => {
+    clientSet.add(ws);
+    ws.send(totalLog);
+    ws.on("close", () => {
+        clientSet.delete(ws);
+    });
+});
+
 app.use(compression());
 app.use("/public", express.static("public"));
 
@@ -32,7 +60,7 @@ app.get("/login", async function (req, res) {
     res.redirect(302, loginUrl);
 });
 
-var server = app.listen(8081, function () {
+server.listen(8081, function () {
     var port = server.address().port;
     console.log("应用实例，访问地址为 http://%s:%s", "localhost", port);
 });

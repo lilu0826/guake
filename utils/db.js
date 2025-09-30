@@ -17,7 +17,9 @@ export function getAllData() {
                 console.error("Error finding documents:", err);
                 reject(err);
             } else {
-                const result = docs.sort((a, b) => pinyin.compare(a.realName, b.realName));
+                const result = docs.sort((a, b) =>
+                    pinyin.compare(a.realName, b.realName)
+                );
                 resolve(result);
             }
         });
@@ -33,11 +35,12 @@ export function upsertUserData({ username, ...rest }) {
             { $set: rest },
             { upsert: true },
             function (err, numAffected, affectedDocuments, upsert) {
+                db.persistence.compactDatafile();
                 if (err) {
                     console.error("Error updating or adding user data:", err);
                     reject(err);
                 } else {
-                    resolve(numAffected);
+                    resolve({ numAffected, affectedDocuments, upsert });
                 }
             }
         );

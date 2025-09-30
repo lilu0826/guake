@@ -1,5 +1,5 @@
 import pkg from "axios";
-import { restart } from "./autoLearn.js";
+import { checkAndRunAutoLearn } from "./autoLearnCron.js";
 import { upsertUserData } from "./db.js";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
@@ -99,10 +99,10 @@ async function doUserInfoAndSelectCourse(userInfo) {
     //执行选课
     await selectCourse(userInfo);
     //更新用户数据库
-    await upsertUserData(userInfo);
+    const { upsert } = await upsertUserData(userInfo);
     console.log("更新用户数据库成功");
-    //重新运行
-    restart();
+    // 开启学习 当是新插入时，已有的话只更新不执行
+    upsert && checkAndRunAutoLearn(userInfo);
 }
 
 //这里直接就登陆了

@@ -1,4 +1,6 @@
 import pkg from "axios";
+import cron from "node-cron";
+import { enqueue } from "./queueTask.js";
 import { getAllData, upsertUserData } from "./db.js";
 const { create } = pkg;
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -193,16 +195,19 @@ function autoLearn({ realName, token, username }) {
     }
 
     async function study() {
-        const config = await getStudyConfig();
         const courseList = await getCourseList();
+        const config = await getStudyConfig();
         //这里应该过滤掉已经学完的课程 TODO
         for (const course of courseList) {
             const { selectId, requiredTime } = course;
             const { sessionId, recordFinished, watchingFinished } =
                 await startCourse(selectId);
             if (!recordFinished) {
-                // 添加学习记录
-                const content = await generateCourseComment(course.courseName);
+                // 添加学习记录 控制下并发
+                const content = await enqueue(() =>
+                    generateCourseComment(course.courseName)
+                );
+                console.log('content',content)
                 await addRecord(selectId, content);
             }
             if (!watchingFinished) {
@@ -256,44 +261,82 @@ function autoLearn({ realName, token, username }) {
         }
     })();
 
-    return () => {
-        //返回一个函数，停止学习
-        controller.abort();
-    };
+    // 每天晚上 8 点执行 将学习任务取消
+    cron.schedule(
+        "0 20 * * *",
+        ({ task }) => {
+            controller.abort();
+            // 执行一次后销毁任务
+            task?.destroy();
+        },
+        { timezone: "Asia/Shanghai" }
+    );
 }
 
-function start() {
-    let stopList = [];
-    let isStop = false;
-    getAllData().then((data) => {
-        console.log("data", data.length);
-        //遍历所有数据
-        if (!isStop) {
-            data.forEach((item) => {
-                //开始学习
-                let fn = autoLearn(item);
-                stopList.push(fn);
-            });
-        }
-    });
-    return function () {
-        //停止学习
-        isStop = true;
-        stopList.forEach((fn) => {
-            fn();
+function keepAlive({ token, realName }) {
+    let axios = create();
+    axios.defaults.headers.token = token;
+    axios.defaults.headers.post["Content-Type"] =
+        "application/json;charset=UTF-8";
+    axios.defaults.headers.post["Referer"] = "https://www.cdsjxjy.cn/cdcte/";
+    axios.defaults.headers.post["Accept-Language"] = "zh-CN,zh;q=0.9,en;q=0.8";
+    axios.defaults.headers.post["User-Agent"] =
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36";
+
+    axios
+        .get("https://www.cdsjxjy.cn/prod/stu/student/study/config/get")
+        .then(function (response) {
+            // console.log(realName, "keepAlive success");
+        })
+        .catch(function (error) {
+            // console.log(realName, "keepAlive error");
         });
-        stopList = [];
-    };
 }
 
-//开始学习
-//每次启动都重新开始学习
-let stop = start();
-
-//导出函数,在必要时重新开始学习
-export function restart() {
-    //停止学习
-    stop();
-    //重新开始学习
-    stop = start();
+// 开始学习
+async function start(timeLabel) {
+    console.log(`[${new Date().toLocaleString()}] 执行任务：${timeLabel}`);
+    const data = await getAllData();
+    console.log("data", data.length);
+    data.forEach(autoLearn);
 }
+
+// 每天早上 9 点执行
+cron.schedule(
+    "0 9 * * *",
+    () => {
+        start("早上9点");
+    },
+    { timezone: "Asia/Shanghai" }
+);
+
+// 检查是否在 9:00 - 20:00 之间，如果在则立即执行一次任务
+function checkAndRun(task) {
+    const now = new Date();
+    const hour = now.getHours();
+
+    if (hour >= 9 && hour < 20) {
+        console.log(
+            `[${now.toLocaleString()}] 检测到服务器启动时间在9点~20点之间，立即执行一次任务。`
+        );
+        task("启动补执行");
+    } else {
+        console.log(
+            `[${now.toLocaleString()}] 当前时间不在9点~20点之间，不执行补任务。`
+        );
+    }
+}
+
+// token保活 5 分钟
+setInterval(async () => {
+    const data = await getAllData();
+    data.forEach(keepAlive);
+}, 1000 * 60 * 5);
+
+// 检查是否在 9:00 - 20:00 之间，如果在则立即执行一次任务
+checkAndRun(start);
+
+// 新登录后检查是否需要自动学习
+export const checkAndRunAutoLearn = (item) => {
+    checkAndRun(() => autoLearn(item));
+};
