@@ -72,25 +72,26 @@ function autoLearn({ realName, token, username }) {
         //   "NotEndCount": 1 //未完成
         // }
         console.log(realName, "课程统计：", res.data.data);
-        let tips = `登陆状态错误，需要重新登陆！`;
-        if (res.data.data) {
-            const { TotalCount, EndCount, NotEndCount } = res.data.data;
-            tips = `已选课程${TotalCount}个,已完成${EndCount}个,未完成${NotEndCount}个。视频学习最多获得20个学分，当前已获得：${creditRes.data.data.value}个学分。`;
-        }
-        upsertUserData({
-            username,
-            TotalCount: 0,
-            EndCount: 0,
-            NotEndCount: 0,
-            ...res.data.data,
-            tips,
-        });
-        return res.data.data;
+        // let tips = `登陆状态错误，需要重新登陆！`;
+        // if (res.data.data) {
+        //     const { TotalCount, EndCount, NotEndCount } = res.data.data;
+        //     tips = `已选课程${TotalCount}个,已完成${EndCount}个,未完成${NotEndCount}个。视频学习最多获得20个学分，当前已获得：${creditRes.data.data.value}个学分。`;
+        // }
+        // upsertUserData({
+        //     username,
+        //     TotalCount: 0,
+        //     EndCount: 0,
+        //     NotEndCount: 0,
+        //     ...res.data.data,
+        //     tips,
+        // });
+        return { ...res.data.data, obtainedValue: creditRes.data.data?.value };
     }
 
     //获取全部课程列表
     async function getCourseList() {
-        const { TotalCount } = await getCourseDatasts();
+        const { TotalCount, EndCount, NotEndCount, obtainedValue } =
+            await getCourseDatasts();
         const res = await axios.post(
             "https://www.cdsjxjy.cn/prod/stu/student/course/page/selected",
             {
@@ -99,6 +100,28 @@ function autoLearn({ realName, token, username }) {
             }
         );
         console.log(realName, "获取课程个数：", res.data.data.content.length);
+
+        let totalPeriod = res.data.data.content.reduce(
+            (pre, cur) => pre + cur.period,
+            0
+        );
+
+        let tips = `登陆状态错误，需要重新登陆！`;
+        if (TotalCount != null) {
+            tips = `
+            已选课程<span style="color:aquamarine">${TotalCount}</span>个,
+            已完成<span style="color:orange">${EndCount}</span>个,
+            未完成<span style="color:red">${NotEndCount}</span>个。
+            <br>
+            视频学习最多获得20个学分，
+            当前已选择<span style="color:darkorange">${totalPeriod.toFixed(2)}</span>个学分，
+            当前已获得：<span style="color:chartreuse">${obtainedValue}</span>个学分。`;
+        }
+        upsertUserData({
+            username,
+            tips,
+        });
+
         return res.data.data.content;
     }
 
