@@ -249,7 +249,7 @@ function autoLearn({ realName, token, username }) {
             }
 
             //更新课程统计信息
-            await getCourseDatasts();
+            await getCourseList();
         }
     }
 
