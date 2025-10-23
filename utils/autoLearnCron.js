@@ -224,8 +224,8 @@ function autoLearn({ realName, token, username }) {
         const courseList = await getCourseList();
         const config = await getStudyConfig();
         for (const course of courseList) {
-            //过滤掉不需要学习的课程
-            if (course.endStatus === 1) continue;
+            //过滤掉不需要学习的课程(endStatus表示观看完，且有commit记录)
+            if (course.endStatus === 1 && course.courseCommit) continue;
 
             const { selectId, requiredTime } = course;
             const { sessionId, recordFinished, watchingFinished } =
