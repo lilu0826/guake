@@ -45,8 +45,14 @@ app.set("view engine", "ejs");
 
 //获取状态
 app.get("/", async function (req, res) {
+    const status = req.query.status || "all";
+    const fileterMap = {
+        all: () => true,
+        finish: (item) => item.courseInfo?.NotEndCount == 0,
+        unfinish: (item) => item.courseInfo?.NotEndCount > 0,
+    }
     const data = await getAllData();
-    res.render("index", { data });
+    res.render("index", { total: data.length, data:data.filter(fileterMap[status] || fileterMap.all) });
 });
 
 //直接重定向登录，由后端跟踪登录状态

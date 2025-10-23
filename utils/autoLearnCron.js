@@ -72,19 +72,6 @@ function autoLearn({ realName, token, username }) {
         //   "NotEndCount": 1 //未完成
         // }
         console.log(realName, "课程统计：", res.data.data);
-        // let tips = `登陆状态错误，需要重新登陆！`;
-        // if (res.data.data) {
-        //     const { TotalCount, EndCount, NotEndCount } = res.data.data;
-        //     tips = `已选课程${TotalCount}个,已完成${EndCount}个,未完成${NotEndCount}个。视频学习最多获得20个学分，当前已获得：${creditRes.data.data.value}个学分。`;
-        // }
-        // upsertUserData({
-        //     username,
-        //     TotalCount: 0,
-        //     EndCount: 0,
-        //     NotEndCount: 0,
-        //     ...res.data.data,
-        //     tips,
-        // });
         return { ...res.data.data, obtainedValue: creditRes.data.data?.value };
     }
 
@@ -105,21 +92,15 @@ function autoLearn({ realName, token, username }) {
             (pre, cur) => pre + cur.period,
             0
         );
-
-        let tips = `登陆状态错误，需要重新登陆！`;
-        if (TotalCount != null) {
-            tips = `
-            已选课程<span style="color:aquamarine">${TotalCount}</span>个,
-            已完成<span style="color:orange">${EndCount}</span>个,
-            未完成<span style="color:red">${NotEndCount}</span>个。
-            <br>
-            视频学习最多获得20个学分，
-            当前已选择<span style="color:darkorange">${totalPeriod.toFixed(2)}</span>个学分，
-            当前已获得：<span style="color:chartreuse">${obtainedValue}</span>个学分。`;
-        }
         upsertUserData({
             username,
-            tips,
+            courseInfo: {
+                TotalCount,
+                EndCount,
+                NotEndCount,
+                totalPeriod: totalPeriod.toFixed(2),
+                obtainedValue,
+            }
         });
 
         return res.data.data.content;
