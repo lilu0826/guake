@@ -10,7 +10,7 @@ function getId() {
     return +new Date() + "n" + Math.ceil(1e3 * Math.random());
 }
 
-const MAX_PERIOD = 20;
+const MAX_PERIOD = 21;
 //配置axios请求实例
 const { create } = pkg;
 let axios = create();
@@ -53,14 +53,14 @@ async function selectCourse(userInfo) {
     const selectedIds = selected.data.data.content.map((item) => item.id);
 
     // 待选课程
-    const res = await axios.post(
+    let res = await axios.post(
         `https://www.cdsjxjy.cn/prod/stu/course/page`,
         {
             teachLevel: student.data.data.teachLevel,
             teachSubject: student.data.data.teachSubject,
             isDisplay: 0,
             pageNum: 1,
-            pageSize: 50,
+            pageSize: 100,
         },
         {
             headers: {
@@ -68,6 +68,31 @@ async function selectCourse(userInfo) {
             },
         }
     );
+
+    const totalPeriod = res.data.data.content.reduce(
+        (pre, cur) => pre + cur.period,
+        0
+    );
+
+    if (totalPeriod < MAX_PERIOD) {
+        console.log("总学时小于20，重新拉取不带参数的课程");
+        res = await axios.post(
+            `https://www.cdsjxjy.cn/prod/stu/course/page`,
+            {
+                // teachLevel: student.data.data.teachLevel,
+                // teachSubject: student.data.data.teachSubject,
+                isDisplay: 0,
+                pageNum: 1,
+                pageSize: 100,
+            },
+            {
+                headers: {
+                    token: userInfo.token,
+                },
+            }
+        );
+    }
+
     console.log("用户待选课程：", res.data.data.content.length);
     // 开始选课 要求大于20学识
     for (const element of res.data.data.content) {
@@ -110,13 +135,13 @@ async function loginByOpenid({ openid }) {
         .post("https://www.cdsjxjy.cn/prod/loginByOpenid", {
             openid,
         })
-        .then((res) => {
+        .then(async (res) => {
             console.log("loginByOpenid", res.data);
             let data = res.data.data;
             if (data) {
                 //登录成功
                 //执行选课
-                doUserInfoAndSelectCourse(data);
+                await doUserInfoAndSelectCourse(data);
             }
             return res.data;
         });
