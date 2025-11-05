@@ -56,8 +56,10 @@ async function selectCourse(userInfo) {
     let res = await axios.post(
         `https://www.cdsjxjy.cn/prod/stu/course/page`,
         {
-            teachLevel: student.data.data.teachLevel,
-            teachSubject: student.data.data.teachSubject,
+            // teachLevel: student.data.data.teachLevel,
+            // teachSubject: student.data.data.teachSubject,
+            courseName: "文翁大讲堂",
+            courseType: "703",
             isDisplay: 0,
             pageNum: 1,
             pageSize: 100,

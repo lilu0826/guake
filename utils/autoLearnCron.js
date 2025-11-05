@@ -272,7 +272,7 @@ function autoLearn({ realName, token, username }) {
 
     // 每天晚上 8 点执行 将学习任务取消
     cron.schedule(
-        "0 20 * * *",
+        "0 22 * * *",
         ({ task }) => {
             controller.abort();
             // 执行一次后销毁任务
@@ -295,10 +295,10 @@ function keepAlive({ token, realName }) {
     axios
         .get("https://www.cdsjxjy.cn/prod/stu/student/study/config/get")
         .then(function (response) {
-            // console.log(realName, "keepAlive success");
+            console.log(realName, "keepAlive success");
         })
         .catch(function (error) {
-            // console.log(realName, "keepAlive error");
+            console.log(realName, "keepAlive error");
         });
 }
 
@@ -324,14 +324,14 @@ function checkAndRun(task) {
     const now = new Date();
     const hour = now.getHours();
 
-    if (hour >= 9 && hour < 20) {
+    if (hour >= 9 && hour < 22) {
         console.log(
-            `[${now.toLocaleString()}] 检测到服务器启动时间在9点~20点之间，立即执行一次任务。`
+            `[${now.toLocaleString()}] 检测到服务器启动时间在9点~22点之间，立即执行一次任务。`
         );
         task("启动补执行");
     } else {
         console.log(
-            `[${now.toLocaleString()}] 当前时间不在9点~20点之间，不执行补任务。`
+            `[${now.toLocaleString()}] 当前时间不在9点~22点之间，不执行补任务。`
         );
     }
 }

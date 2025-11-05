@@ -163,6 +163,7 @@
                                 <th>未完成课程</th>
                                 <th>已选学分</th>
                                 <th>已获得学分</th>
+                                <th>操作</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -174,6 +175,9 @@
                                 <td><%= item.courseInfo?.NotEndCount %></td>
                                 <td><%= item.courseInfo?.totalPeriod %></td>
                                 <td><%= item.courseInfo?.obtainedValue %></td>
+                                <td>
+                                    <a target="_blank" href="https://www.cdsjxjy.cn/cdcte/#/tokenLogin?token=<%= item.token %>">登录</a>  
+                                </td>
                             </tr>
                             <% }) %>
                         </tbody>
