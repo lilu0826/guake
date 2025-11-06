@@ -212,7 +212,7 @@ async function poll(
 }
 
 function pollingLoginStatus({ qrCodeId, deviceId }) {
-    poll(() => wxQrloginCheck({ qrCodeId, deviceId }), 3000, 10);
+    poll(() => wxQrloginCheck({ qrCodeId, deviceId }), 3000, 30);
 }
 
 export { createLoginToUrl, loginByOpenid };

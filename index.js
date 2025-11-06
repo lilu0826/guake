@@ -4,6 +4,8 @@ import compression from "compression";
 import { getAllData } from "./utils/db.js";
 import { WebSocketServer } from "ws";
 import http from "http";
+import { getQr } from "./utils/qr.js";
+
 
 process.on("uncaughtException", function (err) {
     console.log("uncaughtException", err.message);
@@ -63,6 +65,16 @@ app.get("/login", async function (req, res) {
     }
     const { loginUrl } = await createLoginToUrl();
     res.redirect(302, loginUrl);
+});
+
+
+app.get("/login-img", async function (req, res) {
+    const { loginUrl } = await createLoginToUrl();
+
+    getQr(loginUrl).then((buffer) => {
+        res.setHeader("Content-Type", "image/png");
+        res.send(buffer);
+    });
 });
 
 server.listen(8081, function () {
