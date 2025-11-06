@@ -2,6 +2,7 @@ import pkg from "axios";
 import { checkAndRunAutoLearn } from "./autoLearnCron.js";
 import { upsertUserData } from "./db.js";
 import { v4 as uuidv4 } from "uuid";
+import { getUserAgent } from "./randomUserAgent.js";
 import fs from "fs";
 function generateUUIDWithoutDash() {
     return uuidv4().replace(/-/g, "");
@@ -15,11 +16,9 @@ const MAX_PERIOD = 21;
 const { create } = pkg;
 let axios = create();
 axios.defaults.headers.post["Content-Type"] = "application/json;charset=UTF-8";
-axios.defaults.headers.post["Referer"] = "https://www.cdsjxjy.cn/cdcte/";
-axios.defaults.headers.post["Accept-Language"] = "zh-CN,zh;q=0.9,en;q=0.8";
-axios.defaults.headers.post["User-Agent"] =
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36";
-
+axios.defaults.headers["Referer"] = "https://www.cdsjxjy.cn/cdcte/";
+axios.defaults.headers["Accept-Language"] = "zh-CN,zh;q=0.9,en;q=0.8";
+axios.defaults.headers["User-Agent"] = getUserAgent();
 //执行选课
 async function selectCourse(userInfo) {
     //用户信息
@@ -99,7 +98,7 @@ async function selectCourse(userInfo) {
     // 开始选课 要求大于20学识
     for (const element of res.data.data.content) {
         if (currentPeriod >= MAX_PERIOD) {
-            console.log("当前学时", currentPeriod);
+            console.log("选课完成，当前学时", currentPeriod);
             break;
         }
         if (!selectedIds.includes(element.id)) {

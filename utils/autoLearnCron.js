@@ -2,6 +2,7 @@ import pkg from "axios";
 import cron from "node-cron";
 import { enqueue } from "./queueTask.js";
 import { getAllData, upsertUserData } from "./db.js";
+import { getUserAgent } from "./randomUserAgent.js";
 const { create } = pkg;
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 function autoLearn({ realName, token, username }) {
@@ -10,10 +11,9 @@ function autoLearn({ realName, token, username }) {
     axios.defaults.headers.token = token;
     axios.defaults.headers.post["Content-Type"] =
         "application/json;charset=UTF-8";
-    axios.defaults.headers.post["Referer"] = "https://www.cdsjxjy.cn/cdcte/";
-    axios.defaults.headers.post["Accept-Language"] = "zh-CN,zh;q=0.9,en;q=0.8";
-    axios.defaults.headers.post["User-Agent"] =
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36";
+    axios.defaults.headers["Referer"] = "https://www.cdsjxjy.cn/cdcte/";
+    axios.defaults.headers["Accept-Language"] = "zh-CN,zh;q=0.9,en;q=0.8";
+    axios.defaults.headers["User-Agent"] = getUserAgent();
     axios.defaults.signal = controller.signal;
 
     //获取学习配置
