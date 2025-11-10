@@ -3,501 +3,198 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>学习进度追踪 | 加油奥里给</title>
+        <title>加油奥里给</title>
         <style>
             :root {
                 color-scheme: dark;
-                --primary-color: #6366f1;
-                --primary-hover: #4f46e5;
-                --secondary-color: #10b981;
-                --accent-color: #f59e0b;
-                --bg-primary: #111827;
-                --bg-secondary: #1f2937;
-                --bg-card: #2d3748;
-                --text-primary: #f3f4f6;
-                --text-secondary: #9ca3af;
-                --border-color: #374151;
-                --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-                --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-                --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-                --transition-fast: all 0.2s ease;
-                --transition-normal: all 0.3s ease;
             }
-            
+            @font-face {
+                font-family: "Orbitron";
+                font-style: normal;
+                font-weight: 500;
+                font-display: swap;
+                src: url(/public/Orbitron.woff2) format("woff2");
+                unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC,
+                    U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F,
+                    U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF,
+                    U+FFFD;
+            }
             * {
                 box-sizing: border-box;
-                margin: 0;
-                padding: 0;
             }
 
             body {
-                margin: 0 auto;
-                padding: 2rem;
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
-                background: linear-gradient(135deg, var(--bg-primary), #0f172a);
-                color: var(--text-primary);
+                margin: auto;
+                padding: 20px;
+                font-family: "Orbitron", sans-serif;
+                background: linear-gradient(135deg, #1f1c2c, #1f1c2c);
+                color: #fff;
                 min-height: 100vh;
-                display: flex;
-                flex-direction: column;
-                max-width: 1200px;
+                min-height: 100dvh;
+                max-width: 800px;
             }
 
-            header {
+            h3,
+            h4 {
                 text-align: center;
-                margin-bottom: 2rem;
-                animation: fadeInUp 0.6s ease;
-            }
-
-            h1 {
-                font-size: 2.5rem;
-                margin-bottom: 0.5rem;
-                background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-                -webkit-background-clip: text;
-                background-clip: text;
-                -webkit-text-fill-color: transparent;
-                display: inline-block;
-            }
-
-            h3, h4 {
-                text-align: center;
-                margin: 0.5rem 0;
-                color: var(--text-secondary);
+                margin: 10px 0;
             }
 
             a {
-                color: var(--primary-color);
+                color: #00f0ff;
                 text-decoration: none;
-                font-weight: 500;
-                transition: var(--transition-fast);
-                position: relative;
+                font-weight: bold;
+                transition: all 0.3s ease;
             }
 
             a:hover {
-                color: var(--primary-hover);
-            }
-
-            a::after {
-                content: '';
-                position: absolute;
-                width: 0;
-                height: 2px;
-                bottom: -2px;
-                left: 0;
-                background-color: var(--primary-color);
-                transition: var(--transition-fast);
-            }
-
-            a:hover::after {
-                width: 100%;
+                text-shadow: 0 0 10px #00f0ff;
             }
 
             .tips {
                 text-align: center;
-                margin: 1.5rem 0;
-                font-size: 1.25rem;
-                color: var(--accent-color);
-                font-weight: 500;
+                margin: 20px 0;
+                font-size: 18px;
+                color: #ffde59;
             }
 
-            .actions {
-                margin: 1.5rem 0;
-                padding: 1rem;
-                background: var(--bg-card);
-                border-radius: 0.75rem;
-                box-shadow: var(--shadow-md);
-                display: flex;
-                justify-content: center;
-                gap: 1rem;
-            }
-
-            .actions a {
-                padding: 0.5rem 1rem;
-                border-radius: 0.5rem;
-                background: var(--bg-secondary);
-                transition: var(--transition-normal);
-                border: 1px solid transparent;
-            }
-
-            .actions a:hover {
-                background: var(--primary-color);
-                color: white;
-                transform: translateY(-2px);
-                box-shadow: var(--shadow-lg);
-            }
-            
-            .actions a.active {
-                background: var(--primary-color);
-                color: white;
-                box-shadow: var(--shadow-md);
-                border-color: var(--primary-hover);
-            }
-
-            .card {
-                margin: 1.5rem 0;
-                padding: 1.5rem;
-                background: var(--bg-card);
-                border-radius: 0.75rem;
-                box-shadow: var(--shadow-md);
-                transition: var(--transition-normal);
-                border: 1px solid var(--border-color);
-                animation: fadeIn 0.5s ease;
-            }
-
-            .card:hover {
-                box-shadow: var(--shadow-lg);
-                transform: translateY(-3px);
-                border-color: var(--primary-color);
+            .actions{
+                margin-top: 20px;
+                padding: 10px;
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 12px;
             }
 
             .list {
-                overflow-x: auto;
+                margin-top: 20px;
+                padding: 10px;
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 12px;
             }
 
-            .list table {
-                width: 100%;
-                border-collapse: separate;
-                border-spacing: 0;
-                border-radius: 0.5rem;
-                overflow: hidden;
-                table-layout: fixed;
+            .list ul {
+                list-style: none;
+                padding: 0;
             }
 
-            .list table thead {
-                background: var(--primary-color);
-                color: white;
+            .list li {
+                margin: 10px 0;
+                padding: 10px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 8px;
             }
 
-            .list table th {
-                padding: 1rem;
-                text-align: center;
-                font-weight: 600;
-                text-transform: uppercase;
-                font-size: 0.875rem;
-                letter-spacing: 0.05em;
+            .power {
+                text-align: right;
+                margin-top: 30px;
+                font-size: 14px;
+                color: #a0c4ff;
+            }
+            b {
+                color: #00f0ff;
             }
 
-            .list table td {
-                padding: 1rem;
-                text-align: center;
-                border-bottom: 1px solid var(--border-color);
-                background: var(--bg-secondary);
-                transition: var(--transition-fast);
+            @media (max-width: 600px) {
+                body {
+                    padding: 10px;
+                }
             }
-
-            .list table tr:last-child td {
-                border-bottom: none;
-            }
-
-            .list table tr:hover td {
-                background: var(--bg-card);
-            }
-
-            .list table td:first-child {
-                font-weight: 600;
-                color: var(--primary-color);
-            }
-
-            .login-btn {
-                display: inline-block;
-                padding: 0.5rem 1rem;
-                background: var(--primary-color);
-                color: white;
-                border-radius: 0.375rem;
-                font-weight: 500;
-                transition: var(--transition-fast);
-                border: none;
-                cursor: pointer;
-            }
-
-            .login-btn:hover {
-                background: var(--primary-hover);
-                transform: translateY(-1px);
-                box-shadow: var(--shadow-md);
-                color: white;
-            }
-
-            .login-btn::after {
-                display: none;
-            }
-
             .log {
-                margin: 1.5rem 0;
-                padding: 1rem;
-                background: var(--bg-card);
-                border-radius: 0.75rem;
-                box-shadow: var(--shadow-md);
+                margin-top: 20px;
+                padding: 10px;
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 12px;
             }
-
             .log textarea {
                 width: 100%;
                 height: 200px;
-                background: var(--bg-secondary);
-                border-radius: 0.5rem;
-                border: 1px solid var(--border-color);
-                color: var(--text-primary);
-                font-size: 0.875rem;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 8px;
+                border: none;
+                color: #fff;
+                font-size: 14px;
                 resize: vertical;
-                font-family: 'Consolas', 'Monaco', monospace;
+                font-family: sans-serif;
                 outline: none;
-                padding: 1rem;
-                transition: var(--transition-fast);
+                scroll-behavior: smooth;
             }
 
-            .log textarea:focus {
-                border-color: var(--primary-color);
-                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-            }
-
-            footer {
-                margin-top: auto;
-                text-align: center;
-                padding: 1.5rem 0;
-                color: var(--text-secondary);
-                font-size: 0.875rem;
-            }
-
-            .progress-container {
+            .list table{
                 width: 100%;
-                height: 8px;
-                background: var(--bg-secondary);
-                border-radius: 4px;
-                overflow: hidden;
-                margin: 0.5rem 0;
+                table-layout: fixed;
+                border: 1px solid #00f0ff;
+                border-collapse: collapse;
             }
-
-            .progress-bar {
-                height: 100%;
-                background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
-                border-radius: 4px;
-                transition: width 0.6s ease;
+            .list table thead{
+                background-color: #2f1c2c;
             }
-
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(10px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
+            .list table th{
+                border: 1px solid #00f0ff;
+                text-align: center;
             }
-
-            @keyframes fadeInUp {
-                from {
-                    opacity: 0;
-                    transform: translateY(-20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
+            .list table td{
+                border: 1px solid #00f0ff;
+                text-align: center;
             }
-
-            @media (max-width: 768px) {
-                body {
-                    padding: 1rem;
-                }
-                
-                h1 {
-                    font-size: 2rem;
-                }
-                
-                .actions {
-                    flex-wrap: wrap;
-                }
-                
-                .list table {
-                    font-size: 0.875rem;
-                }
-                
-                .list table th,
-                .list table td {
-                    padding: 0.75rem 0.5rem;
-                }
-            }
-
-            @media (max-width: 480px) {
-                body {
-                    padding: 0.75rem;
-                }
-                
-                .card {
-                    padding: 1rem;
-                }
-                
-                .list table {
-                    font-size: 0.75rem;
-                }
-                
-                .list table th,
-                .list table td {
-                    padding: 0.5rem 0.25rem;
-                }
+            .list table td:first-child{
+                font-weight: bold;
             }
         </style>
     </head>
     <body>
-        <header>
-            <h1>🌟 学习进度追踪 🌟</h1>
-            <h4>没有你的名字？<a href="/login">立即登录</a> 开始学习之旅！</h4>
-        </header>
+        <h3>🌟 状态查询 🌟</h3>
 
-        <div class="tips">当前共有 <strong><%= total %></strong> 名老师正在学习中</div>
-        
+        <h4>没有你的名字？点击👉<a href="/login">这里👈</a>一键登录</h4>
+
+        <div class="tips">共有<%= total %>名老师正在学习中👇</div>
         <div class="actions">
-            <a href="?status=all" class="filter-btn" data-status="all">全部</a>
-            <a href="?status=finish" class="filter-btn" data-status="finish">已完成学习</a>
-            <a href="?status=unfinish" class="filter-btn" data-status="unfinish">进行中学习</a>
+            过滤：
+            <a href="?status=all">全部</a>
+            <a href="?status=finish">已完成</a>
+            <a href="?status=unfinish">未完成</a>
         </div>
-        
-        <div class="card list">
+        <div class="list">
             <table>
-                <thead>
-                    <tr>
-                        <th>老师</th>
-                        <th>已选/已完成/未完成课程</th>
-                        <!-- <th>已完成课程</th>
-                        <th>未完成课程</th> -->
-                        <th>已选/已获学分</th>
-                        <!-- <th>已获学分</th> -->
-                        <!-- <th>进度%</th> -->
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% data.forEach(item=> { 
-                        // 计算完成百分比
-                        const totalCourses = parseInt(item.courseInfo?.TotalCount || 0);
-                        const completedCourses = parseInt(item.courseInfo?.EndCount || 0);
-                        const progressPercentage = totalCourses > 0 ? Math.round((completedCourses / totalCourses) * 100) : 0;
-                    %>
-                    <tr>
-                        <td>
-                            <%= item.realName %>
-                        </td>
-                        <td>
-                            <%= item.courseInfo?.TotalCount %> /
-                            <%= item.courseInfo?.EndCount %> /
-                            <%= item.courseInfo?.NotEndCount %>
-                        </td>
-                        <!-- <td><%= item.courseInfo?.EndCount %></td>
-                        <td><%= item.courseInfo?.NotEndCount %></td> -->
-                        <td>
-                            <%= item.courseInfo?.totalPeriod %> /
-                            <%= item.courseInfo?.obtainedValue %>
-                        </td>
-                        <!-- <td><%= item.courseInfo?.obtainedValue %></td> -->
-                        <!-- <td>
-                            <div class="progress-container">
-                                <div class="progress-bar" style="width: <%= progressPercentage %>%"></div>
-                            </div>
-                            <span style="font-size: 0.875rem;"><%= progressPercentage %>%</span>
-                        </td> -->
-                        <td>
-                            <a class="login-btn" target="_blank" href="https://www.cdsjxjy.cn/cdcte/#/tokenLogin?token=<%= item.token %>">进入</a>  
-                        </td>
-                    </tr>
-                    <% }) %>
-                </tbody>
-            </table>
+                        <thead>
+                            <tr>
+                                <th>老师名称</th>
+                                <th>已选课程</th>
+                                <th>已完成课程</th>
+                                <th>未完成课程</th>
+                                <th>已选学分</th>
+                                <th>已获得学分</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% data.forEach(item=> { %>
+                            <tr>
+                                <td><%= item.realName %></td>
+                                <td><%= item.courseInfo?.TotalCount %></td>
+                                <td><%= item.courseInfo?.EndCount %></td>
+                                <td><%= item.courseInfo?.NotEndCount %></td>
+                                <td><%= item.courseInfo?.totalPeriod %></td>
+                                <td><%= item.courseInfo?.obtainedValue %></td>
+                                <td>
+                                    <a target="_blank" href="https://www.cdsjxjy.cn/cdcte/#/tokenLogin?token=<%= item.token %>">登录</a>  
+                                </td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
         </div>
 
-        <div class="card log">
-            <h4 style="text-align: left; margin-bottom: 1rem;"><strong>实时日志</strong></h4>
-            <textarea name="" id="log-output" readonly></textarea>
+        <div class="log">
+            <textarea name="" id="" readonly></textarea>
         </div>
 
-        <footer>
-            <div class="power">⚡ 由 帅哥程序猿 💻 开发 | 为学习加油助力 ⚡</div>
-        </footer>
+        <div class="power">--- develop by 帅哥程序猿 💻</div>
         <script>
-            // 连接WebSocket获取实时日志
             const ws = new WebSocket("/");
-            const logOutput = document.getElementById("log-output");
-            
-            // 优化的日志自动滚动逻辑 - 只有当用户在底部附近才自动滚动
-            function autoScrollIfAtBottom() {
-                const isNearBottom = logOutput.scrollHeight - logOutput.scrollTop - logOutput.clientHeight < 100; // 底部100px内视为接近底部
-                
-                if (isNearBottom) {
-                    logOutput.scrollTop = logOutput.scrollHeight;
-                }
-            }
-            
             ws.onmessage = (e) => {
-                logOutput.value += e.data + '\n';
-                // 只有当用户在底部附近才自动滚动
-                autoScrollIfAtBottom();
+                const log = document.querySelector(".log textarea");
+                log.innerHTML += e.data;
             };
-            
-            // 首次加载时滚动到底部
-            setTimeout(() => {
-                logOutput.scrollTop = logOutput.scrollHeight;
-            }, 100);
-            // 添加平滑滚动
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('href'));
-                    if (target) {
-                        target.scrollIntoView({
-                            behavior: 'smooth'
-                        });
-                    }
-                });
-            });
-            
-            // 根据URL参数高亮筛选栏
-            function highlightActiveFilter() {
-                // 获取URL中的status参数
-                const urlParams = new URLSearchParams(window.location.search);
-                const currentStatus = urlParams.get('status') || 'all'; // 默认高亮'全部状态'
-                
-                // 获取所有筛选按钮
-                const filterButtons = document.querySelectorAll('.filter-btn');
-                
-                // 移除所有按钮的active类
-                filterButtons.forEach(btn => {
-                    btn.classList.remove('active');
-                });
-                
-                // 为当前选中的按钮添加active类
-                const activeButton = document.querySelector(`.filter-btn[data-status="${currentStatus}"]`);
-                if (activeButton) {
-                    activeButton.classList.add('active');
-                }
-            }
-            
-            // 页面加载时执行高亮
-            document.addEventListener('DOMContentLoaded', function() {
-                highlightActiveFilter();
-                
-                // 为筛选按钮添加点击事件
-                const filterButtons = document.querySelectorAll('.filter-btn');
-                filterButtons.forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        // 点击后会页面刷新，无需手动更新active状态
-                        // 页面刷新后会重新执行highlightActiveFilter函数
-                    });
-                });
-            });
-            
-            // 为表格行添加进入动画
-            document.addEventListener('DOMContentLoaded', function() {
-                const rows = document.querySelectorAll('.list tbody tr');
-                rows.forEach((row, index) => {
-                    row.style.opacity = '0';
-                    row.style.transform = 'translateY(20px)';
-                    row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                    
-                    setTimeout(() => {
-                        row.style.opacity = '1';
-                        row.style.transform = 'translateY(0)';
-                    }, 100 * index);
-                });
-            });
-            
         </script>
     </body>
 </html>
