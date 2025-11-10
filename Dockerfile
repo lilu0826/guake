@@ -10,6 +10,16 @@ RUN apk add --no-cache tzdata \
     && echo "Asia/Shanghai" > /etc/timezone \
     && apk del tzdata
 
+# 安装编译 canvas 所需依赖
+RUN apk add --no-cache \
+    build-base \
+    cairo-dev \
+    jpeg-dev \
+    pango-dev \
+    giflib-dev \
+    librsvg-dev \
+    python3
+
 # 创建工作目录
 WORKDIR /app
 
