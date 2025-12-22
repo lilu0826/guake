@@ -165,7 +165,8 @@
                                 <td><%= item.courseInfo?.totalPeriod %></td>
                                 <td><%= item.courseInfo?.obtainedValue %></td>
                                 <td>
-                                    <a target="_blank" href="https://www.cdsjxjy.cn/cdcte/#/tokenLogin?token=<%= item.token %>">登录</a>  
+                                    <a target="_blank" href="https://www.cdsjxjy.cn/cdcte/#/tokenLogin?token=<%= item.token %>">登录</a> 
+                                    <a target="_blank" href="#" style="color: red;" onclick="handleDelete('<%= item.username %>',event)">删除</a>
                                 </td>
                             </tr>
                             <% }) %>
@@ -184,6 +185,12 @@
                 const log = document.querySelector(".log textarea");
                 log.innerHTML += e.data;
             };
+            function handleDelete(username,event) {
+                event.preventDefault();
+                if (confirm("确定要删除吗？")) {
+                    window.location.href = `/delete?username=${username}`;
+                }
+            }
         </script>
     </body>
 </html>

@@ -12,17 +12,26 @@ const db = new NeDB({
 // 获取所有数据
 export function getAllData() {
     return new Promise((resolve, reject) => {
-        db.find({}, function (err, docs) {
-            if (err) {
-                console.error("Error finding documents:", err);
-                reject(err);
-            } else {
-                const result = docs.sort((a, b) =>
-                    pinyin.compare(a.realName, b.realName)
-                );
-                resolve(result);
+        db.find(
+            {
+                $or: [
+                    { deleted: false },
+                    { deleted: null },
+                    { deleted: { $exists: false } },
+                ],
+            },
+            function (err, docs) {
+                if (err) {
+                    console.error("Error finding documents:", err);
+                    reject(err);
+                } else {
+                    const result = docs.sort((a, b) =>
+                        pinyin.compare(a.realName, b.realName)
+                    );
+                    resolve(result);
+                }
             }
-        });
+        );
     });
 }
 
@@ -38,6 +47,27 @@ export function upsertUserData({ username, ...rest }) {
                 db.persistence.compactDatafile();
                 if (err) {
                     console.error("Error updating or adding user data:", err);
+                    reject(err);
+                } else {
+                    resolve({ numAffected, affectedDocuments, upsert });
+                }
+            }
+        );
+    });
+}
+
+// 删除数据
+export function deleteUserData(username) {
+    return new Promise((resolve, reject) => {
+        // 软删除
+        db.update(
+            { username: username },
+            { $set: { deleted: true } },
+            {},
+            function (err, numAffected, affectedDocuments, upsert) {
+                db.persistence.compactDatafile();
+                if (err) {
+                    console.error("Error updating user data:", err);
                     reject(err);
                 } else {
                     resolve({ numAffected, affectedDocuments, upsert });

@@ -1,7 +1,7 @@
 import { createLoginToUrl, loginByOpenid } from "./utils/login.js";
 import express from "express";
 import compression from "compression";
-import { getAllData } from "./utils/db.js";
+import { getAllData,deleteUserData } from "./utils/db.js";
 import { WebSocketServer } from "ws";
 import http from "http";
 import { getQr } from "./utils/qr.js";
@@ -55,6 +55,12 @@ app.get("/", async function (req, res) {
     const data = await getAllData();
     res.render("index", { total: data.length, data:data.filter(fileterMap[status] || fileterMap.all) });
 });
+
+app.get("/delete", async function (req, res) { 
+    await deleteUserData(req.query.username)
+    res.redirect(req.headers.referer)
+})
+
 
 //直接重定向登录，由后端跟踪登录状态
 app.get("/login", async function (req, res) {
