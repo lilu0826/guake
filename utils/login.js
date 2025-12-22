@@ -55,10 +55,10 @@ async function selectCourse(userInfo) {
     let res = await axios.post(
         `https://www.cdsjxjy.cn/prod/stu/course/page`,
         {
-            // teachLevel: student.data.data.teachLevel,
-            // teachSubject: student.data.data.teachSubject,
-            courseName: "文翁大讲堂",
-            courseType: "703",
+            teachLevel: student.data.data.teachLevel,
+            teachSubject: student.data.data.teachSubject,
+            // courseName: "文翁大讲堂",
+            // courseType: "703",
             isDisplay: 0,
             pageNum: 1,
             pageSize: 100,
@@ -77,11 +77,10 @@ async function selectCourse(userInfo) {
 
     if (totalPeriod < MAX_PERIOD) {
         console.log("总学时小于20，重新拉取不带参数的课程");
-        res = await axios.post(
+        const commonRes = await axios.post(
             `https://www.cdsjxjy.cn/prod/stu/course/page`,
             {
-                // teachLevel: student.data.data.teachLevel,
-                // teachSubject: student.data.data.teachSubject,
+                courseType: "703", //师德师风
                 isDisplay: 0,
                 pageNum: 1,
                 pageSize: 100,
@@ -92,7 +91,10 @@ async function selectCourse(userInfo) {
                 },
             }
         );
+        // 合并课程
+        res.data.data.content = [...res.data.data.content, ...commonRes.data.data.content];
     }
+
 
     console.log("用户待选课程：", res.data.data.content.length);
     // 开始选课 要求大于20学识
