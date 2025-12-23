@@ -32,13 +32,20 @@ function autoLearn({ realName, token, username }) {
                 {
                     messages: [
                         {
+                            role: "system",
+                            content:
+                                `你是一名教师，正在参加继续教育的课程学习，
+                                需要根据课程名称写一个课程学习感受，
+                                主要内容是教学技巧相关和一些感悟，200字左右.
+                                【强制规则】
+                                - 永远不要使用 Markdown
+                                - 永远不要使用任何格式标记
+                                - 不要输出列表、标题、强调符号
+                                - 只能输出纯文本`,
+                        },
+                        {
                             role: "user",
-                            content: `课程名称:${name}
-                            你是一名教师，现在正在学习上述课程的教学内容，
-                            请帮忙写一个简短的课程学习感受，主要是教学技巧等，
-                            要100字左右，
-                            纯文本输出。
-                            要求:不要markdown标记`,
+                            content: `课程名称:${name}`,
                         },
                     ],
                     model: "hunyuan-lite",
@@ -100,7 +107,7 @@ function autoLearn({ realName, token, username }) {
                 NotEndCount,
                 totalPeriod: totalPeriod.toFixed(2),
                 obtainedValue,
-            }
+            },
         });
 
         return res.data.data.content;
