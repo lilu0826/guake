@@ -64,7 +64,7 @@ app.get("/delete", async function (req, res) {
 
 
 app.get("/write", async function (req, res) { 
-    await write(req.query.token)
+    await write(req.query.token,req.query.username)
     res.send("ok")
 })
 

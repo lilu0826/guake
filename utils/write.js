@@ -1,6 +1,7 @@
 import pkg from "axios";
 import { getUserAgent } from "./randomUserAgent.js";
 import { enqueue } from "./queueTask.js";
+import { updateCredit } from "./updateCredit.js";
 //配置axios请求实例
 const { create } = pkg;
 let axios = create();
@@ -104,9 +105,7 @@ async function write1(token) {
                 },
             }
         );
-    } catch (error) {
-
-    }
+    } catch (error) {}
 }
 
 async function write2(token) {
@@ -126,14 +125,14 @@ async function write2(token) {
                 },
             }
         );
-    } catch (error) {
-
-    }
+    } catch (error) {}
 }
 
-export async function write(token) {
+export async function write(token, username) {
     for (let i = 0; i < 3; i++) {
         await write1(token);
         await write2(token);
     }
+    //更新单个
+    await updateCredit({ token, username });
 }

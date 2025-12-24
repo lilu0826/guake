@@ -3,6 +3,7 @@ import cron from "node-cron";
 import { enqueue } from "./queueTask.js";
 import { getAllData, upsertUserData } from "./db.js";
 import { getUserAgent } from "./randomUserAgent.js";
+import { updateCredit } from "./updateCredit.js";
 const { create } = pkg;
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 function autoLearn({ realName, token, username }) {
@@ -33,8 +34,7 @@ function autoLearn({ realName, token, username }) {
                     messages: [
                         {
                             role: "system",
-                            content:
-                                `你是一名教师，正在参加继续教育的课程学习，
+                            content: `你是一名教师，正在参加继续教育的课程学习，
                                 需要根据课程名称写一个课程学习感受，
                                 主要内容是教学技巧相关和一些感悟，200字左右.
                                 【强制规则】
@@ -209,6 +209,7 @@ function autoLearn({ realName, token, username }) {
     }
 
     async function study() {
+        await updateCredit({ token, username });
         const courseList = await getCourseList();
         const config = await getStudyConfig();
         for (const course of courseList) {
@@ -296,9 +297,7 @@ function keepAlive({ token, realName }) {
         "application/json;charset=UTF-8";
     axios.defaults.headers.post["Referer"] = "https://www.cdsjxjy.cn/cdcte/";
     axios.defaults.headers.post["Accept-Language"] = "zh-CN,zh;q=0.9,en;q=0.8";
-    axios.defaults.headers.post["User-Agent"] =
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36";
-
+    axios.defaults.headers.post["User-Agent"] = getUserAgent();
     axios
         .get("https://www.cdsjxjy.cn/prod/stu/student/study/config/get")
         .then(function (response) {
