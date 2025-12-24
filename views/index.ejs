@@ -166,6 +166,7 @@
                                 <td><%= item.courseInfo?.obtainedValue %></td>
                                 <td>
                                     <a target="_blank" href="https://www.cdsjxjy.cn/cdcte/#/tokenLogin?token=<%= item.token %>">登录</a> 
+                                    <a target="_blank" href="/write?token=<%= item.token %>">填写</a> 
                                     <a target="_blank" href="#" style="color: red;" onclick="handleDelete('<%= item.username %>',event)">删除</a>
                                 </td>
                             </tr>

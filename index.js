@@ -5,6 +5,7 @@ import { getAllData,deleteUserData } from "./utils/db.js";
 import { WebSocketServer } from "ws";
 import http from "http";
 import { getQr } from "./utils/qr.js";
+import { write } from "./utils/write.js";
 
 process.on("uncaughtException", function (err) {
     console.log("uncaughtException", err.message);
@@ -61,6 +62,11 @@ app.get("/delete", async function (req, res) {
     res.redirect(req.headers.referer)
 })
 
+
+app.get("/write", async function (req, res) { 
+    await write(req.query.token)
+    res.send("ok")
+})
 
 //直接重定向登录，由后端跟踪登录状态
 app.get("/login", async function (req, res) {
