@@ -148,13 +148,12 @@
                             <tr>
                                 <th>老师名称</th>
                                 <th>已选课程</th>
-                                <th>已完成课程</th>
                                 <th>未完成课程</th>
                                 <th>已选学分</th>
                                 <th>已获得学分</th>
                                 <th>读书笔记</th>
                                 <th>反思周记</th>
-                                <th style="width: 110px;">操作</th>
+                                <th>操作</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -162,7 +161,7 @@
                             <tr>
                                 <td><%= item.realName %></td>
                                 <td><%= item.courseInfo?.TotalCount %></td>
-                                <td><%= item.courseInfo?.EndCount %></td>
+                                
                                 <td><%= item.courseInfo?.NotEndCount %></td>
                                 <td><%= item.courseInfo?.totalPeriod %></td>
                                 <td><%= item.courseInfo?.obtainedValue %></td>
