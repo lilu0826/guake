@@ -1,8 +1,6 @@
 import NeDB from "nedb";
 import { fileURLToPath } from "url";
 import path from "path";
-import pkg from "pinyin";
-const { pinyin } = pkg;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const db = new NeDB({
@@ -26,7 +24,7 @@ export function getAllData() {
                     reject(err);
                 } else {
                     const result = docs.sort((a, b) =>
-                        pinyin.compare(a.realName, b.realName)
+                        a.createTime - b.createTime
                     );
                     resolve(result);
                 }

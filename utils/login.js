@@ -127,7 +127,10 @@ async function doUserInfoAndSelectCourse(userInfo) {
     //执行选课
     await selectCourse(userInfo);
     //更新用户数据库
-    const { upsert } = await upsertUserData(userInfo);
+    const { upsert } = await upsertUserData({
+        ...userInfo,
+        createTime: Date.now(),
+    });
     console.log("更新用户数据库成功");
     // 开启学习 当是新插入时，已有的话只更新不执行
     upsert && checkAndRunAutoLearn(userInfo);
