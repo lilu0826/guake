@@ -151,8 +151,7 @@
                                 <th>未完成</th>
                                 <th>总学分</th>
                                 <th>获得学分</th>
-                                <th>读书</th>
-                                <th>反思</th>
+                                <th>读书/反思</th>
                                 <th>操作</th>
                             </tr>
                         </thead>
@@ -165,14 +164,13 @@
                                 <td><%= item.courseInfo?.NotEndCount %></td>
                                 <td><%= item.courseInfo?.totalPeriod %></td>
                                 <td><%= item.courseInfo?.obtainedValue %></td>
-                                <td><%= item.bookCredit %></td>
-                                <td><%= item.weeklyCredit %></td>
+                                <td><%= item.bookCredit %>/<%= item.weeklyCredit %></td>
                                 <td>
                                     <a target="_blank" href="https://www.cdsjxjy.cn/cdcte/#/tokenLogin?token=<%= item.token %>">登录</a> 
                                     <% if (item.bookCredit != 8 || item.weeklyCredit != 8) { %>
-                                        <a target="_blank" href="/write?token=<%= item.token %>&username=<%= item.username %>">填写</a>
+                                        <br><a target="_blank" href="/write?token=<%= item.token %>&username=<%= item.username %>">填写</a>
                                     <% } %>
-                                    <a target="_blank" href="#" style="color: red;" onclick="handleDelete('<%= item.username %>',event)">删除</a>
+                                    <br><a target="_blank" href="#" style="color: red;" onclick="handleDelete('<%= item.username %>',event)">删除</a>
                                 </td>
                             </tr>
                             <% }) %>
