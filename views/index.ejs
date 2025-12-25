@@ -82,10 +82,16 @@
             b {
                 color: #00f0ff;
             }
+            .table-actions{
+                    width: 120px;
+                }
 
             @media (max-width: 600px) {
                 body {
                     padding: 10px;
+                }
+                .table-actions{
+                    width: 40px;
                 }
             }
             .log {
@@ -152,7 +158,7 @@
                                 <th>总学分</th>
                                 <th>获得学分</th>
                                 <th>读书/反思</th>
-                                <th>操作</th>
+                                <th class="table-actions">操作</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -168,9 +174,9 @@
                                 <td>
                                     <a target="_blank" href="https://www.cdsjxjy.cn/cdcte/#/tokenLogin?token=<%= item.token %>">登录</a> 
                                     <% if (item.bookCredit != 8 || item.weeklyCredit != 8) { %>
-                                        <br><a target="_blank" href="/write?token=<%= item.token %>&username=<%= item.username %>">填写</a>
+                                        <a target="_blank" href="/write?token=<%= item.token %>&username=<%= item.username %>">填写</a>
                                     <% } %>
-                                    <br><a target="_blank" href="#" style="color: red;" onclick="handleDelete('<%= item.username %>',event)">删除</a>
+                                    <a target="_blank" href="#" style="color: red;" onclick="handleDelete('<%= item.username %>',event)">删除</a>
                                 </td>
                             </tr>
                             <% }) %>
