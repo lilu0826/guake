@@ -46,7 +46,7 @@ app.set("views", "./views");
 app.set("view engine", "ejs");
 
 //获取状态
-app.get("/", async function (req, res) {
+app.get("/java", async function (req, res) {
     const status = req.query.status || "all";
     const fileterMap = {
         all: () => true,
