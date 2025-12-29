@@ -11,13 +11,7 @@ const db = new NeDB({
 export function getAllData() {
     return new Promise((resolve, reject) => {
         db.find(
-            {
-                $or: [
-                    { deleted: false },
-                    { deleted: null },
-                    { deleted: { $exists: false } },
-                ],
-            },
+            {},
             function (err, docs) {
                 if (err) {
                     console.error("Error finding documents:", err);
@@ -57,20 +51,18 @@ export function upsertUserData({ username, ...rest }) {
 // 删除数据
 export function deleteUserData(username) {
     return new Promise((resolve, reject) => {
-        // 软删除
-        db.update(
-            { username: username },
-            { $set: { deleted: true } },
+        db.remove(
+            { username },
             {},
             function (err, numAffected, affectedDocuments, upsert) {
                 db.persistence.compactDatafile();
                 if (err) {
-                    console.error("Error updating user data:", err);
+                    console.error("Error deleting user data:", err);
                     reject(err);
-                } else {
-                    resolve({ numAffected, affectedDocuments, upsert });
                 }
+                resolve(numAffected);
             }
-        );
+        )
+        
     });
 }
