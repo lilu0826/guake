@@ -85,6 +85,37 @@ app.get("/login-img", async function (req, res) {
     res.render("qrcode", { dataUrl });
 });
 
+// 给前台用的东西
+app.get("/api/login-img", async function (req, res) {
+    const { qrCodeId,loginUrl } = await createLoginToUrl();
+    const dataUrl = await getQr(loginUrl)
+    res.send({
+        dataUrl,
+        qrCodeId
+    });
+});
+
+app.get("/api/login-status", async function (req, res) { 
+    const { qrCodeId } = req.query;
+    const all = await getAllData()
+    const item = all.find(item => item.qrCodeId === qrCodeId)
+    res.send({
+        data: item || {},
+        success: !!item
+    });
+});
+
+
+app.get("/api/get-user-info", async function (req, res) { 
+    const { username } = req.query;
+    const all = await getAllData()
+    const item = all.find(item => item.username === username)
+    res.send({
+        data: item || {},
+        success: !!item
+    });
+});
+
 server.listen(8081, function () {
     var port = server.address().port;
     console.log("应用实例，访问地址为 http://%s:%s", "localhost", port);

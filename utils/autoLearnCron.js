@@ -236,6 +236,16 @@ function autoLearn({ realName, token, username }) {
                         watchingFinished,
                         duration,
                     } = await trackCourse(sessionId);
+
+                    await upsertUserData({
+                        username,
+                        currentCourse: {
+                            courseName: course.courseName,
+                            requiredTime,
+                            duration
+                        }
+                    })
+
                     if (
                         creditObtained ||
                         watchingFinished ||

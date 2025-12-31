@@ -30,32 +30,34 @@ const status = ref("waiting");
 const statusText = ref("等待扫码中…");
 
 // 模拟二维码（你后面换成后端生成的）
-const loginToken = "1111"
-const qrCodeUrl = ref(
-    `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=https://yourapp.org/login?token=${loginToken}`
-);
+const loginToken = ref("");
+const qrCodeUrl = ref("");
 
+async function getQrCode() {
+    const response = await fetch("/api/login-img")
+    const json = await response.json()
+    console.log('json', json)
+    qrCodeUrl.value = json.dataUrl
+    loginToken.value = json.qrCodeId
+}
 // 模拟轮询扫码状态
 let timer = null;
 
 onMounted(() => {
-    timer = setInterval(() => {
-        // TODO：这里改成请求后端接口
-        // /api/login/status?token=xxx
-
-        // 模拟 5 秒后扫码成功
-        if (Date.now() % 5 === 0) {
+    getQrCode()
+    timer = setInterval(async () => {
+        const response = await fetch(`/api/login-status?qrCodeId=${loginToken.value}`)
+        const json = await response.json()
+        if (json.success) {
             status.value = "success";
             statusText.value = "扫码成功，正在进入…";
-
             clearInterval(timer);
-
-            // setTimeout(() => {
-            //     router.push("/status");
-            // }, 1200);
+            router.push("/status?username="+json.data.username);
         }
     }, 1000);
 });
+
+
 
 useEventListener("visibilitychange", (event) => {
   console.log('event',event)

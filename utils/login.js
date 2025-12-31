@@ -92,9 +92,11 @@ async function selectCourse(userInfo) {
             }
         );
         // 合并课程
-        res.data.data.content = [...res.data.data.content, ...commonRes.data.data.content];
+        res.data.data.content = [
+            ...res.data.data.content,
+            ...commonRes.data.data.content,
+        ];
     }
-
 
     console.log("用户待选课程：", res.data.data.content.length);
     // 开始选课 要求大于20学识
@@ -124,14 +126,14 @@ async function selectCourse(userInfo) {
 
 //执行选课
 async function doUserInfoAndSelectCourse(userInfo) {
-    //执行选课
-    await selectCourse(userInfo);
     //更新用户数据库
     const { upsert } = await upsertUserData({
         ...userInfo,
         createTime: Date.now(),
     });
     console.log("更新用户数据库成功");
+    //执行选课
+    await selectCourse(userInfo);
     // 开启学习 当是新插入时，已有的话只更新不执行
     upsert && checkAndRunAutoLearn(userInfo);
 }
@@ -166,7 +168,7 @@ async function wxQrloginCheck({ qrCodeId, deviceId }) {
             if (data) {
                 //登录成功
                 //执行选课
-                doUserInfoAndSelectCourse(data);
+                doUserInfoAndSelectCourse({ ...data, qrCodeId });
             }
             return Boolean(data);
         });
@@ -185,7 +187,7 @@ async function createLoginToUrl() {
     // 这里可以使用轮询函数来检查登录状态
     pollingLoginStatus({ qrCodeId, deviceId });
     console.log("loginUrl", loginUrl);
-    return { loginUrl };
+    return { qrCodeId, loginUrl };
 }
 
 async function poll(
