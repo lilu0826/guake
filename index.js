@@ -120,6 +120,12 @@ app.get("/api/get-user-info", async function (req, res) {
     });
 });
 
+
+app.get("/api/write", async function (req, res) { 
+    await write(req.query.token,req.query.username)
+    res.send("ok")
+})
+
 server.listen(8081, function () {
     var port = server.address().port;
     console.log("应用实例，访问地址为 http://%s:%s", "localhost", port);

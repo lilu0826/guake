@@ -6,9 +6,33 @@
                 <h2>👩‍🏫{{ info.realName }}老师，您好</h2>
                 <span class="time">当前时间：{{ now }}</span>
             </div>
+        </div>
+        <div class="card">
+            <div class="section">
+                <div class="label">
+                    <span class="title">读书笔记/反思周记</span>
+                    <a v-if="info.bookCredit + info.bookCredit != 16" class="btn" @click="handleFill">AI一键填写</a>
+                </div>
+                <div class="course-items">
+                    <div class="item">
+                        <div class="title">读书笔记学分</div>
+                        <div class="content">
+                            {{ info.bookCredit }}
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="title">反思周记学分</div>
+                        <div class="content">
+                            {{ info.weeklyCredit }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
             <!-- 课程统计 -->
             <div class="section">
-                <div class="label">课程信息</div>
+                <div class="label">视频课程信息</div>
                 <div class="course-items">
                     <div class="item">
                         <div class="title">已选课程</div>
@@ -82,21 +106,31 @@
                     </li>
                 </ul>
             </div>
-
+        </div>
+        <div class="card">
             <!-- 提示 -->
             <div class="footer">提示：关闭该页面也会自动学习获取学分哦</div>
         </div>
+
+
+        <teleport to="body">
+            <div class="modal" v-if="showTip">
+                <div class="modal-content">
+                    AI正在自动填写中,大约1-2分钟完成,请耐心等待...
+                </div>
+            </div>
+        </teleport>
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute,useRouter } from "vue-router";
 
 const route = useRoute();
-// 基本信息（后端返回）
-const teacherName = ref("");
-const courseName = ref("2024 年教师师德培训");
+const router = useRouter();
+
+const showTip = ref(false);
 
 // 状态数据
 const progress = ref(0);
@@ -120,6 +154,10 @@ function updateStatus() {
     fetch("/api/get-user-info?username=" + route.query.username)
         .then((res) => res.json())
         .then((json) => {
+            if (!json.success) {
+                router.push("/");
+                return;
+            }
             info.value = json.data;
             const { duration, requiredTime } = json.data.currentCourse || {
                 duration: 0,
@@ -142,28 +180,47 @@ function updateStatus() {
         });
 }
 
+async function handleFill() {
+    showTip.value = true;
+    console.log('info', info.value)
+    try { 
+        const response = await fetch(`/api/write?username=${info.value.username}&token=${info.value.token}`);
+        const text = await response.text();
+        updateStatus()
+        showTip.value = false;
+    }catch (error) {
+        console.log('error', error)
+    }
+}
+
 onMounted(() => {
     // 模拟状态更新
     updateStatus();
     updateTime();
     setInterval(updateTime, 1000);
-    timer = setInterval(updateStatus, 5000);
+    timer = setInterval(updateStatus, 3000);
 });
 </script>
 
 <style scoped>
+.btn {
+    margin-left: auto;
+    color: #409eff;
+    cursor: pointer;
+}
 .status-page {
     background: #f5f7fa;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     padding: 20px;
+    gap: 10px;
+    max-width: 400px;
+    margin: 0 auto;
 }
 
 .card {
-    max-width: 420px;
-    flex: 1;
     background: #fff;
-    padding: 24px;
+    padding: 16px;
     border-radius: 12px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
 }
@@ -172,7 +229,6 @@ onMounted(() => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
 }
 
 .header h2 {
@@ -187,12 +243,16 @@ onMounted(() => {
 .section {
     margin-bottom: 18px;
 }
+.section:last-child {
+    margin-bottom: 0;
+}
 
 .label {
     font-weight: bold;
     font-size: 16px;
     color: #333;
     margin-bottom: 6px;
+    display: flex;
 }
 
 .course {
@@ -281,9 +341,26 @@ onMounted(() => {
 }
 
 .footer {
-    margin-top: 12px;
     font-size: 12px;
     color: #999;
     text-align: center;
 }
+
+.modal{
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: all 0.5s ease;
+}
+.modal-content{ 
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
 </style>

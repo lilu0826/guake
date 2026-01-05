@@ -9,7 +9,7 @@
                 <img class="qr-img" :src="qrCodeUrl" alt="扫码登录" />
             </div>
 
-            <p class="tip">请长按上方二维码选择<b>【识别二维码】</b>进行登录！</p>
+            <p class="tip">请长按上方二维码选择<b>【识别图中的二维码】</b>进行登录！</p>
 
             <div class="status">
                 <span class="dot" :class="status"></span>

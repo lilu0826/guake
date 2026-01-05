@@ -23,7 +23,7 @@ async function writeBookComment() {
                     {
                         role: "user",
                         content: `
-                            每次任选一本书写一段读书评价，评价内容要求2000字。
+                            请任选一本书写一段读书评价，评价内容要求2000字。
                             强制要求：
                             - 返回一个json，格式如下{ bookName：xxx, bookComment: xxx }
                             - 输出的json必须包含 bookName 和 bookComment 两个字段
@@ -59,7 +59,7 @@ async function writeWeeklyReport() {
                     {
                         role: "user",
                         content: `
-                            帮我写一篇反思周记
+                            帮我写一篇教学反思周记
                             强制要求：
                             - 返回一个json，格式如下
                             {
@@ -90,8 +90,7 @@ async function writeWeeklyReport() {
     }
 }
 
-async function write1(token) {
-    let content = await enqueue(() => writeBookComment());
+async function write1(token,content) {
     try {
         content = JSON.parse(content.replaceAll("\n", ""));
         let count = Math.ceil(2000 / content.bookComment.length);
@@ -108,8 +107,7 @@ async function write1(token) {
     } catch (error) {}
 }
 
-async function write2(token) {
-    let content = await enqueue(() => writeWeeklyReport());
+async function write2(token,content) {
     try {
         content = JSON.parse(content.replaceAll("\n", ""));
         let count = Math.ceil(2000 / content.feeling.length);
@@ -129,9 +127,11 @@ async function write2(token) {
 }
 
 export async function write(token, username) {
+    let bookContent = await enqueue(() => writeBookComment());
+    let weeklyContent = await enqueue(() => writeWeeklyReport());
     for (let i = 0; i < 3; i++) {
-        await write1(token);
-        await write2(token);
+        await write1(token,bookContent);
+        await write2(token,weeklyContent);
     }
     //更新单个
     await updateCredit({ token, username });
