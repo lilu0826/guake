@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted,onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { useEventListener } from "@vueuse/core";
 const router = useRouter();
@@ -40,23 +40,46 @@ async function getQrCode() {
     qrCodeUrl.value = json.dataUrl
     loginToken.value = json.qrCodeId
 }
+
+async function checkLoginStatus(qrCodeId) {
+    const response = await fetch("/api/login-status?qrCodeId=" + qrCodeId)
+    const json = await response.json()
+    console.log('json', json)
+    if (json.success) {
+        status.value = "success"
+        statusText.value = "扫码成功"
+        router.push("/status?username=" + json.data.username);
+        localStorage.setItem("qrCodeId", qrCodeId)
+        return true
+    }
+    return false
+}
+
+
 // 模拟轮询扫码状态
 let timer = null;
 
-onMounted(() => {
-    getQrCode()
+onMounted(async () => {
+    const qrCodeId = localStorage.getItem("qrCodeId")
+    if (qrCodeId) {
+        if (await checkLoginStatus(qrCodeId)) {
+            return
+        } else {
+            localStorage.removeItem("qrCodeId")
+        }
+    }
+    await getQrCode()
     timer = setInterval(async () => {
-        const response = await fetch(`/api/login-status?qrCodeId=${loginToken.value}`)
-        const json = await response.json()
-        if (json.success) {
-            status.value = "success";
-            statusText.value = "扫码成功，正在进入…";
-            clearInterval(timer);
-            router.push("/status?username="+json.data.username);
+        const result = await checkLoginStatus(loginToken.value)
+        if (result) {
+            clearInterval(timer)
         }
     }, 1000);
 });
 
+onUnmounted(() => {
+    clearInterval(timer)
+});
 
 
 useEventListener("visibilitychange", (event) => {

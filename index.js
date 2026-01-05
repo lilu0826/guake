@@ -41,6 +41,10 @@ wss.on("connection", (ws, req) => {
 
 app.use(compression());
 app.use("/public", express.static("public"));
+app.use("/web", express.static("web/dist"));
+
+
+
 
 app.set("views", "./views");
 app.set("view engine", "ejs");

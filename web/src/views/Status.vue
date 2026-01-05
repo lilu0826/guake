@@ -73,7 +73,7 @@
             </div>
 
             <!-- 最近日志 -->
-            <div class="section">
+            <div class="section" v-if="status != 'success'">
                 <div class="label">最近活动</div>
                 <ul class="log">
                     <li v-for="(item, index) in logs" :key="index">
@@ -84,7 +84,7 @@
             </div>
 
             <!-- 提示 -->
-            <div class="footer">继续教育学习助手</div>
+            <div class="footer">提示：关闭该页面也会自动学习获取学分哦</div>
         </div>
     </div>
 </template>
@@ -153,15 +153,15 @@ onMounted(() => {
 
 <style scoped>
 .status-page {
-    min-height: 100vh;
     background: #f5f7fa;
     display: flex;
     justify-content: center;
-    padding-top: 40px;
+    padding: 20px;
 }
 
 .card {
-    width: 420px;
+    max-width: 420px;
+    flex: 1;
     background: #fff;
     padding: 24px;
     border-radius: 12px;
