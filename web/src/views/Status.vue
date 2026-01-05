@@ -3,7 +3,7 @@
         <div class="card">
             <!-- 顶部 -->
             <div class="header">
-                <h2>👩‍🏫{{ info.realName }}老师，您好</h2>
+                <h2 style="margin: 0;">👩‍🏫{{ info.realName }}老师，您好</h2>
                 <span class="time">当前时间：{{ now }}</span>
             </div>
         </div>
