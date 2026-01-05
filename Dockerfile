@@ -20,6 +20,15 @@ RUN npm install
 # 拷贝源代码
 COPY . .
 
+# 进入web目录
+WORKDIR /app/web
+
+# 安装依赖
+RUN npm install
+
+# 构建web
+RUN npm run build
+
 # 暴露端口（如果你使用 8081 端口）
 EXPOSE 8081
 
