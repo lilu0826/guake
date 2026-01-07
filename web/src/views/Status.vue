@@ -11,7 +11,7 @@
             <div class="section">
                 <div class="label">
                     <span class="title">读书笔记/反思周记</span>
-                    <a v-if="info.bookCredit + info.bookCredit != 16" class="btn" @click="handleFill">AI一键填写</a>
+                    <a v-if="info.bookCredit + info.weeklyCredit < 16" class="btn" @click="handleFill">AI一键填写</a>
                 </div>
                 <div class="course-items">
                     <div class="item">
