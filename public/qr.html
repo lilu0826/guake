@@ -116,7 +116,7 @@
         <p>输入地址，生成扫码登录二维码</p>
 
         <div class="input-group">
-            <input type="text" id="url" value="http://221.182.13.37:2316/login" placeholder="请输入二维码地址" />
+            <input type="text" id="url" placeholder="请输入二维码地址" />
             <input type="button" value="生成" onclick="createQrCode()" />
         </div>
 
@@ -128,6 +128,8 @@
     </div>
 
     <script>
+        document.getElementById("url").value = `${window.location.origin}/login`
+        createQrCode()
         function createQrCode() {
             const box = document.getElementById("qrBox");
             box.innerHTML = "";
