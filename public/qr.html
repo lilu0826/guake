@@ -144,7 +144,7 @@
             const tempDiv = document.createElement("div");
             new QRCode(tempDiv, url);
 
-            const image = tempDiv.querySelector("img");
+            const image = tempDiv.querySelector("canvas");
 
             const canvas = document.createElement("canvas");
             canvas.width = 200;
@@ -160,13 +160,11 @@
             const textWidth = ctx.measureText(text).width;
             ctx.fillText(text, (200 - textWidth) / 2, 80);
 
-            image.onload = () => {
-                ctx.drawImage(image, 29, 100, 142, 142);
+            ctx.drawImage(image, 29, 100, 142, 142);
 
-                const finalImg = new Image();
-                finalImg.src = canvas.toDataURL("image/png");
-                box.appendChild(finalImg);
-            };
+            const finalImg = new Image();
+            finalImg.src = canvas.toDataURL("image/png");
+            box.appendChild(finalImg);
         }
     </script>
 </body>
