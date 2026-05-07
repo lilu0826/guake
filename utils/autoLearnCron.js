@@ -1,104 +1,77 @@
-import pkg from "axios";
-import cron from "node-cron";
 import { enqueue } from "./queueTask.js";
 import { getAllData, upsertUserData } from "./db.js";
-import { getUserAgent } from "./randomUserAgent.js";
 import { updateCredit } from "./updateCredit.js";
-const { create } = pkg;
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+import { createContinueEducationClient } from "./continueEducationClient.js";
+import { write } from "./write.js";
+const learningControllers = new Map();
+
+function createCanceledError() {
+    const error = new Error("canceled");
+    error.name = "CanceledError";
+    return error;
+}
+
+const delay = (ms, signal) =>
+    new Promise((resolve, reject) => {
+        if (signal?.aborted) {
+            reject(createCanceledError());
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            signal?.removeEventListener("abort", handleAbort);
+            resolve();
+        }, ms);
+
+        function handleAbort() {
+            clearTimeout(timer);
+            signal?.removeEventListener("abort", handleAbort);
+            reject(createCanceledError());
+        }
+
+        signal?.addEventListener("abort", handleAbort);
+    });
+
 function autoLearn({ realName, token, username }) {
+    stop(username);
+
     const controller = new AbortController();
-    let axios = create();
-    axios.defaults.headers.token = token;
-    axios.defaults.headers.post["Content-Type"] =
-        "application/json;charset=UTF-8";
-    axios.defaults.headers["Referer"] = "https://www.cdsjxjy.cn/cdcte/";
-    axios.defaults.headers["Accept-Language"] = "zh-CN,zh;q=0.9,en;q=0.8";
-    axios.defaults.headers["User-Agent"] = getUserAgent();
-    axios.defaults.signal = controller.signal;
+    learningControllers.set(username, controller);
+
+    const client = createContinueEducationClient({
+        token,
+        signal: controller.signal,
+    });
 
     //获取学习配置
     async function getStudyConfig() {
-        const res = await axios.get(
-            "https://www.cdsjxjy.cn/prod/stu/student/study/config/get"
-        );
-        console.log(realName, "获取学习配置：", res.data.data);
-        return res.data.data;
-    }
-
-    async function generateCourseComment(name) {
-        try {
-            const res = await axios.post(
-                "https://api.hunyuan.cloud.tencent.com/v1/chat/completions",
-                {
-                    messages: [
-                        {
-                            role: "system",
-                            content: `你是一名教师，正在参加继续教育的课程学习，
-                                需要根据课程名称写一个课程学习感受，
-                                主要内容是教学技巧相关和一些感悟，200字左右.
-                                【强制规则】
-                                - 永远不要使用 Markdown
-                                - 永远不要使用任何格式标记
-                                - 不要输出列表、标题、强调符号
-                                - 只能输出纯文本`,
-                        },
-                        {
-                            role: "user",
-                            content: `课程名称:${name}`,
-                        },
-                    ],
-                    model: "hunyuan-lite",
-                },
-                {
-                    headers: {
-                        Authorization:
-                            "Bearer sk-S1vOklie4GCzcjbcNkNnZtKEsAokoR0DokmTlnpf6tHCE5MD",
-                        "content-type": "application/json; charset=utf-8",
-                    },
-                }
-            );
-            return res.data.choices[0].message.content;
-        } catch (error) {
-            return "好";
-        }
+        const data = await client.getStudyConfig();
+        console.log(realName, "获取学习配置：", data);
+        return data;
     }
 
     //获取课程统计信息
     async function getCourseDatasts() {
-        const res = await axios.post(
-            "https://www.cdsjxjy.cn/prod/stu/student/course/page/datasts",
-            {}
-        );
-        const creditRes = await axios.get(
-            "https://www.cdsjxjy.cn/prod/stu/student/course/getCredit"
-        );
+        const data = await client.getCourseDatasts();
+        const stats = { ...data };
+        delete stats.obtainedValue;
         // {
         //   "TotalCount": 1, //总数
         //   "EndCount": 0,   //已完成
         //   "NotEndCount": 1 //未完成
         // }
-        console.log(realName, "课程统计：", res.data.data);
-        return { ...res.data.data, obtainedValue: creditRes.data.data?.value };
+        console.log(realName, "课程统计：", stats);
+        return data;
     }
 
     //获取全部课程列表
     async function getCourseList() {
         const { TotalCount, EndCount, NotEndCount, obtainedValue } =
             await getCourseDatasts();
-        const res = await axios.post(
-            "https://www.cdsjxjy.cn/prod/stu/student/course/page/selected",
-            {
-                pageNum: 1,
-                pageSize: TotalCount,
-            }
-        );
-        console.log(realName, "获取课程个数：", res.data.data.content.length);
+        const courses = await client.getSelectedCourses(TotalCount);
+        console.log(realName, "获取课程个数：", courses.length);
 
-        let totalPeriod = res.data.data.content.reduce(
-            (pre, cur) => pre + cur.period,
-            0
-        );
+        let totalPeriod = courses.reduce((pre, cur) => pre + cur.period, 0);
         upsertUserData({
             username,
             courseInfo: {
@@ -110,17 +83,12 @@ function autoLearn({ realName, token, username }) {
             },
         });
 
-        return res.data.data.content;
+        return courses;
     }
 
     //开始学习获取课程信息
     async function startCourse(selectId) {
-        const res = await axios.post(
-            "https://www.cdsjxjy.cn/prod/stu/student/course/study/start",
-            {
-                selectId,
-            }
-        );
+        const data = await client.startCourse(selectId);
         // {
         //     "hasOther": false,
         //     "sessionId": "xxxxxxxxxxxxxxxxxxxxxxxx",
@@ -129,87 +97,62 @@ function autoLearn({ realName, token, username }) {
         //     "duration": 1124,
         //     "recordFinished": false
         // }
-        const { hasOther, sessionId } = res.data.data;
+        const { hasOther, sessionId } = data;
         if (hasOther) {
             //结束其他课程
             await endCourse(sessionId);
             //开始新课程
             return startCourse(selectId);
         }
-        console.log(realName, "开始学习课程：", selectId, res.data.data);
-        return res.data.data;
+        console.log(realName, "开始学习课程：", selectId, data);
+        return data;
     }
 
     //结束之前得学习
     async function endCourse(sessionId) {
-        const res = await axios.post(
-            "https://www.cdsjxjy.cn/prod/stu/student/course/study/end",
-            {
-                sessionId,
-            }
-        );
-        console.log(
-            realName,
-            "结束学习课程：",
-            sessionId,
-            res.data.code == 200
-        );
-        return res.data.code == 200;
+        const success = await client.endCourse(sessionId);
+        console.log(realName, "结束学习课程：", sessionId, success);
+        return success;
     }
 
     // 跟踪学习记录（发送心跳）
     async function trackCourse(sessionId) {
-        const res = await axios.post(
-            "https://www.cdsjxjy.cn/prod/stu/student/course/study/heartbeat",
-            {
-                sessionId,
-            }
-        );
+        const data = await client.trackCourse(sessionId);
         // {
         //     "watchingFinished": false, //观看完成
         //     "creditObtained": false, // 学分获得
         //     "verifyCode": "3465", // 验证码
         //     "duration": 2007 //学习时长
         // }
-        console.log(realName, "跟踪学习时长：", sessionId, res.data.data);
-        return res.data.data;
+        console.log(realName, "跟踪学习时长：", sessionId, data);
+        return data;
     }
 
     //发送验证码
     async function verifyCourse(sessionId, verifyCode) {
-        const res = await axios.post(
-            "https://www.cdsjxjy.cn/prod/stu/student/course/study/verify",
-            {
-                sessionId,
-                verifyCode,
-            }
-        );
-        console.log(
-            realName,
-            "发送验证码：",
-            sessionId,
-            verifyCode,
-            res.data.code == 200
-        );
-        return res.data.code == 200;
+        const success = await client.verifyCourse(sessionId, verifyCode);
+        console.log(realName, "发送验证码：", sessionId, verifyCode, success);
+        return success;
     }
 
     // 添加学习记录
     async function addRecord(selectId, content = "好") {
-        const res = await axios.post(
-            "https://www.cdsjxjy.cn/prod/stu/learning/record",
-            {
-                selectId,
-                feeling: content,
-                courseContent: content,
-            }
-        );
-        console.log(realName, "添加学习记录：", selectId, res.data.code == 200);
-        return res.data.code == 200;
+        const success = await client.addRecord(selectId, content);
+        console.log(realName, "添加学习记录：", selectId, success);
+        return success;
     }
 
     async function study() {
-        await updateCredit({ token, username });
+        const { weeklyCredit, bookCredit } = await updateCredit({
+            token,
+            username,
+            signal: controller.signal,
+        });
+        console.log(realName, "weeklyCredit", weeklyCredit);
+        console.log(realName, "bookCredit", bookCredit);
+        if (weeklyCredit + bookCredit < 16) {
+            write(token, username);
+        }
         const courseList = await getCourseList();
         const config = await getStudyConfig();
         for (const course of courseList) {
@@ -222,7 +165,7 @@ function autoLearn({ realName, token, username }) {
             if (!recordFinished) {
                 // 添加学习记录 控制下并发
                 const content = await enqueue(() =>
-                    generateCourseComment(course.courseName)
+                    client.generateCourseComment(course.courseName),
                 );
                 console.log("content", content);
                 await addRecord(selectId, content);
@@ -242,9 +185,9 @@ function autoLearn({ realName, token, username }) {
                         currentCourse: {
                             courseName: course.courseName,
                             requiredTime,
-                            duration
-                        }
-                    })
+                            duration,
+                        },
+                    });
 
                     if (
                         creditObtained ||
@@ -258,7 +201,7 @@ function autoLearn({ realName, token, username }) {
                         //发送验证码
                         await verifyCourse(sessionId, verifyCode);
                     }
-                    await delay(1000 * config.interval);
+                    await delay(1000 * config.interval, controller.signal);
                 }
             }
             if (sessionId) {
@@ -280,6 +223,9 @@ function autoLearn({ realName, token, username }) {
             } catch (error) {
                 if (error.message == "canceled") {
                     console.log(realName, "学习取消");
+                    if (learningControllers.get(username) === controller) {
+                        learningControllers.delete(username);
+                    }
                     break;
                 }
                 console.log(realName, "学习出错，正在重试！", error.message);
@@ -287,29 +233,23 @@ function autoLearn({ realName, token, username }) {
             }
         }
     })();
-
-    // 每天晚上 8 点执行 将学习任务取消
-    cron.schedule(
-        "0 22 * * *",
-        ({ task }) => {
-            controller.abort();
-            // 执行一次后销毁任务
-            task?.destroy();
-        },
-        { timezone: "Asia/Shanghai" }
-    );
 }
 
+export function stop(username) {
+    const controller = learningControllers.get(username);
+    if (!controller) return false;
+
+    controller.abort();
+    learningControllers.delete(username);
+    return true;
+}
+
+export const stopAutoLearn = stop;
+
 function keepAlive({ token, realName }) {
-    let axios = create();
-    axios.defaults.headers.token = token;
-    axios.defaults.headers.post["Content-Type"] =
-        "application/json;charset=UTF-8";
-    axios.defaults.headers.post["Referer"] = "https://www.cdsjxjy.cn/cdcte/";
-    axios.defaults.headers.post["Accept-Language"] = "zh-CN,zh;q=0.9,en;q=0.8";
-    axios.defaults.headers.post["User-Agent"] = getUserAgent();
-    axios
-        .get("https://www.cdsjxjy.cn/prod/stu/student/study/config/get")
+    const client = createContinueEducationClient({ token });
+    client
+        .getStudyConfig()
         .then(function (response) {
             console.log(realName, "keepAlive success");
         })
@@ -326,42 +266,19 @@ async function start(timeLabel) {
     data.forEach(autoLearn);
 }
 
-// 每天早上 9 点执行
-cron.schedule(
-    "0 9 * * *",
-    () => {
-        start("早上9点");
+// token保活 5 分钟
+setInterval(
+    async () => {
+        const data = await getAllData();
+        data.forEach(keepAlive);
     },
-    { timezone: "Asia/Shanghai" }
+    1000 * 60 * 5,
 );
 
-// 检查是否在 9:00 - 20:00 之间，如果在则立即执行一次任务
-function checkAndRun(task) {
-    const now = new Date();
-    const hour = now.getHours();
-
-    if (hour >= 9 && hour < 22) {
-        console.log(
-            `[${now.toLocaleString()}] 检测到服务器启动时间在9点~22点之间，立即执行一次任务。`
-        );
-        task("启动补执行");
-    } else {
-        console.log(
-            `[${now.toLocaleString()}] 当前时间不在9点~22点之间，不执行补任务。`
-        );
-    }
-}
-
-// token保活 5 分钟
-setInterval(async () => {
-    const data = await getAllData();
-    data.forEach(keepAlive);
-}, 1000 * 60 * 5);
-
-// 检查是否在 9:00 - 20:00 之间，如果在则立即执行一次任务
-checkAndRun(start);
+// 服务启动后全天候直接执行一次任务
+start("启动执行");
 
 // 新登录后检查是否需要自动学习
 export const checkAndRunAutoLearn = (item) => {
-    checkAndRun(() => autoLearn(item));
+    autoLearn(item);
 };

@@ -6,6 +6,7 @@ import { WebSocketServer } from "ws";
 import http from "http";
 import { getQr } from "./utils/qr.js";
 import { write } from "./utils/write.js";
+import { stop } from "./utils/autoLearnCron.js";
 
 process.on("uncaughtException", function (err) {
     console.log("uncaughtException", err.message);
@@ -62,6 +63,7 @@ app.get("/java", async function (req, res) {
 });
 
 app.get("/delete", async function (req, res) { 
+    stop(req.query.username)
     await deleteUserData(req.query.username)
     res.redirect(req.headers.referer)
 })
