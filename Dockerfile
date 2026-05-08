@@ -33,4 +33,4 @@ RUN npm run build
 EXPOSE 8081
 
 # 启动应用
-CMD ["node", "index.js"]
+CMD ["node", "/app/index.js"]
