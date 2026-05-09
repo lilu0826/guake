@@ -246,6 +246,15 @@ export function stop(username) {
 
 export const stopAutoLearn = stop;
 
+export async function restartAutoLearn(username) {
+    const data = await getAllData();
+    const item = data.find((item) => item.username === username);
+    if (!item) return false;
+
+    autoLearn(item);
+    return true;
+}
+
 function keepAlive({ token, realName }) {
     const client = createContinueEducationClient({ token });
     client

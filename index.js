@@ -6,7 +6,7 @@ import { WebSocketServer } from "ws";
 import http from "http";
 import { getQr } from "./utils/qr.js";
 import { write } from "./utils/write.js";
-import { stop } from "./utils/autoLearnCron.js";
+import { restartAutoLearn, stop } from "./utils/autoLearnCron.js";
 
 process.on("uncaughtException", function (err) {
     console.log("uncaughtException", err.message);
@@ -66,6 +66,14 @@ app.get("/delete", async function (req, res) {
     stop(req.query.username)
     await deleteUserData(req.query.username)
     res.redirect(req.headers.referer)
+})
+
+app.get("/restart", async function (req, res) {
+    const restarted = await restartAutoLearn(req.query.username);
+    if (!restarted) {
+        return res.status(404).send("user not found");
+    }
+    res.redirect(req.headers.referer || "/java");
 })
 
 
