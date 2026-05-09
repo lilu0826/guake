@@ -32,5 +32,7 @@ RUN npm run build
 # 暴露端口（如果你使用 8081 端口）
 EXPOSE 8081
 
+WORKDIR /app
+
 # 启动应用
 CMD ["node", "index.js"]
