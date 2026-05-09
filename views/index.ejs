@@ -173,7 +173,7 @@
                                 <td><%= item.bookCredit %>/<%= item.weeklyCredit %></td>
                                 <td>
                                     <a target="_blank" href="https://www.cdsjxjy.cn/cdcte/#/tokenLogin?token=<%= item.token %>">登录</a> 
-                                    <% if (item.bookCredit != 8 || item.weeklyCredit != 8) { %>
+                                    <% if (item.bookCredit + item.weeklyCredit < 16) { %>
                                         <a target="_blank" href="/write?token=<%= item.token %>&username=<%= item.username %>">填写</a>
                                     <% } %>
                                     <a target="_blank" href="#" style="color: red;" onclick="handleDelete('<%= item.username %>',event)">删除</a>
